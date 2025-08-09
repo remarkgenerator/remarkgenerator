@@ -238,19 +238,19 @@
         <table id="heirsTable" aria-label="ওয়ারিশদের তথ্যের তালিকা">
           <thead>
             <tr>
-              <th style="width: 35%;">ওয়ারিশের নাম</th>
-              <th style="width: 20%;">সম্পর্ক</th>
-              <th style="width: 20%;">মোবাইল নম্বর</th>
-              <th style="width: 20%;">ঠিকানা</th>
+              <th style="width: 30%;">নাম</th>
+              <th style="width: 15%;">বয়স</th>
+              <th style="width: 25%;">সম্পর্ক</th>
+              <th style="width: 25%;">মন্তব্য (ঐচ্ছিক)</th>
               <th style="width: 5%;">#</th>
             </tr>
           </thead>
           <tbody id="heirsBody">
             <tr>
               <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+              <td><input type="text" name="age[]" required placeholder="বয়স"></td>
               <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
-              <td><input type="text" name="mobile[]" placeholder="মোবাইল নম্বর"></td>
-              <td><input type="text" name="address[]" placeholder="ঠিকানা"></td>
+              <td><input type="text" name="comment[]" placeholder="মন্তব্য"></td>
               <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
             </tr>
           </tbody>
@@ -271,9 +271,9 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+        <td><input type="text" name="age[]" required placeholder="বয়স"></td>
         <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
-        <td><input type="text" name="mobile[]" placeholder="মোবাইল নম্বর"></td>
-        <td><input type="text" name="address[]" placeholder="ঠিকানা"></td>
+        <td><input type="text" name="comment[]" placeholder="মন্তব্য"></td>
         <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
       `;
       tbody.appendChild(tr);
@@ -313,16 +313,16 @@
       // ওয়ারিশদের তথ্য সংগ্রহ করা
       const heirs = [];
       const heirNames = document.getElementsByName('heirName[]');
+      const ages = document.getElementsByName('age[]');
       const relations = document.getElementsByName('relation[]');
-      const mobiles = document.getElementsByName('mobile[]');
-      const addresses = document.getElementsByName('address[]');
+      const comments = document.getElementsByName('comment[]');
 
       for(let i=0; i<heirNames.length; i++) {
         heirs.push({
           name: heirNames[i].value.trim(),
+          age: ages[i].value.trim(),
           relation: relations[i].value.trim(),
-          mobile: mobiles[i].value.trim(),
-          address: addresses[i].value.trim(),
+          comment: comments[i].value.trim(),
         });
       }
 
@@ -344,9 +344,9 @@
           <thead>
             <tr>
               <th>নাম</th>
+              <th>বয়স</th>
               <th>সম্পর্ক</th>
-              <th>মোবাইল নম্বর</th>
-              <th>ঠিকানা</th>
+              <th>মন্তব্য</th>
             </tr>
           </thead>
           <tbody>
@@ -356,9 +356,9 @@
         html += `
           <tr>
             <td>${h.name}</td>
+            <td>${h.age}</td>
             <td>${h.relation}</td>
-            <td>${h.mobile || '-'}</td>
-            <td>${h.address || '-'}</td>
+            <td>${h.comment || '-'}</td>
           </tr>
         `;
       });
@@ -371,17 +371,20 @@
 
       pdfContent.innerHTML = html;
 
-      // pdfContent div কে বডিতে যোগ না করে সরাসরি html2pdf কল করা
+      // pdfContent div কে বডিতে যোগ না pdfContent.innerHTML = html;
+
+      // pdfContent div কে বডিতে যোগ না করে সরাসরি html2pdf এ প্রেরণ করব
       const opt = {
-        margin:       0.4,
-        filename:     `Warishon_Sondho_${deceasedName.replace(/\s+/g, '_')}.pdf`,
+        margin:       0.5,
+        filename:     'warish_sondho.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2 },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
       };
 
+      // PDF তৈরি এবং ডাউনলোড করা
       html2pdf().set(opt).from(pdfContent).save();
     });
   </script>
 </body>
-            </html>
+                                           </html>
