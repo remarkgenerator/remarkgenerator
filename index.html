@@ -1,274 +1,76 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ওয়ারিশন সনদ — Auto PDF (Ready)</title>
-
-<!-- jsPDF -->
+<meta charset="utf-8">
+<title>ওয়ারিশন সনদ — Auto PDF</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
-body { font-family: "Noto Sans Bengali", Arial, sans-serif; background:#f3f4f6; margin:0; padding:20px; }
-.container { max-width:900px; margin:0 auto; background:#fff; padding:18px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
-header { text-align:center; margin-bottom:10px; }
-header img { max-height:70px }
-h1 { margin:6px 0; font-size:22px }
-.small { color:#666; font-size:13px }
-.row { margin-bottom:10px }
-label { display:block; font-weight:700; margin-bottom:6px }
-input[type=text], textarea, select { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; font-size:15px }
-button, .btn { background:#0b5ed7; color:#fff; padding:8px 12px; border:none; border-radius:6px; cursor:pointer }
-#heirsTable { width:100%; border-collapse:collapse; margin:10px 0 }
-#heirsTable th, #heirsTable td { border:1px solid #e0e0e0; padding:6px; text-align:left; vertical-align:top }
-.row-inline { display:flex; gap:8px }
-.row-inline input { flex:1 }
-.removeRow { background:#e74c3c; padding:4px 8px; border-radius:4px; border:none; color:#fff; cursor:pointer }
-.muted { color:#666; font-size:13px }
-#note { font-size:13px; color:#444; margin-top:8px }
-.muted-small { font-size:12px; color:#777; margin-top:6px }
-.hidden { display:none; }
-.center { text-align:center; }
-.flex { display:flex; gap:8px; align-items:center; }
-#statusMsg { padding:8px; border-radius:6px; margin-top:8px; font-size:14px; display:none; }
-.success { background:#d1fae5; color:#065f46; }
-.error { background:#fee2e2; color:#991b1b; }
+body { font-family: "Noto Sans Bengali", Arial, sans-serif; }
 </style>
 </head>
-
 <body>
-<div class="container">
-<header>
-  <img id="logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
-  <h1>ওয়ারিশন সনদ ফর্ম</h1>
-  <p class="small">তথ্য পূরণ করে Submit দিলে পিডিএফ স্বয়ংক্রিয়ভাবে ডাউনলোড হবে।</p>
-</header>
 
-<main>
 <form id="warishForm">
-  <div class="row"><label>ফর্ম নাম</label><input name="formName" type="text" value="বিভাগ জেলা ও পৌরসভার নাম লিখুন" required></div>
-  <div class="row"><label>ফর্ম নম্বর (ঐচ্ছিক)</label><input name="formNumber" type="text"></div>
-
-  <h3>মৃত ব্যক্তির তথ্য</h3>
-  <div class="row"><label>মৃত ব্যক্তির নাম</label><input name="deceasedName" type="text" required></div>
-  <div class="row"><label>পিতা/স্বামী</label><input name="fatherName" type="text" required></div>
-  <div class="row"><label>মহল্লা</label><input name="mohalla" type="text" required></div>
-  <div class="row"><label>ওয়ার্ড নং</label><input name="ward" type="text" required></div>
-  <div class="row"><label>ডাকঘর</label><input name="postOffice" type="text" required></div>
-  <div class="row"><label>উপজেলা/থানা</label><input name="thana" type="text" required></div>
-  <div class="row"><label>জেলা</label><input name="district" type="text" required></div>
-
-  <h3>ওয়ারিশদের তালিকা</h3>
-  <table id="heirsTable">
-    <thead>
-      <tr><th style="width:60px">ক্রমিক নং</th><th>নাম</th><th style="width:80px">বয়স</th><th style="width:120px">সম্পর্ক</th><th>মন্তব্য</th><th style="width:80px"></th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <div style="margin-bottom:10px" class="flex">
-    <button type="button" id="addHeirBtn" class="btn">+ ওয়ারিশ যোগ করুন</button>
-    <div class="muted-small">(নাম খালি থাকলে PDF-এ সেই রো আসবে না)</div>
-  </div>
-
-  <div class="row">
-    <label>আপনার ফোন</label>
-    <input name="phone" type="text" placeholder="০১XXXXXXXXX" >
-  </div>
-  <div class="row">
-    <label>আপনার ইমেইল (ঐচ্ছিক)</label>
-    <input name="email" type="text" placeholder="example@mail.com" >
-  </div>
-
-  <div id="fontStatus" class="muted-small">ফন্ট লোডিং চলছে...</div>
-  <div id="statusMsg"></div>
-
-  <div class="row" style="margin-top:12px">
-    <button type="submit" id="submitBtn">Submit and Generate PDF</button>
-  </div>
-  <p id="note">নোট: Submit দিলে পিডিএফ ব্রাউজার থেকেই ডাউনলোড হবে।</p>
+  <label>মৃত ব্যক্তির নাম</label>
+  <input name="deceasedName" required><br>
+  <label>পিতা/স্বামী</label>
+  <input name="fatherName" required><br>
+  <button type="submit">PDF বানাও</button>
 </form>
-</main>
-</div>
 
 <script>
-function sanitize(str) { return String(str||'').replace(/[<>]/g, '').replace(/["']/g, ''); }
-function generateRef(){ const t = Date.now().toString().slice(-6); const r = Math.floor(Math.random()*9000)+1000; return 'WF-'+t+'-'+r; }
-function bnNumber(num) { return String(num).replace(/\d/g, d=>"০১২৩৪৫৬৭৮৯"[Number(d)]); }
-function bnDate() { const d=new Date(); return `${bnNumber(d.getDate())}/${bnNumber(d.getMonth()+1)}/${bnNumber(d.getFullYear())}`; }
-function showMsg(msg,type){ const el=document.getElementById('statusMsg'); el.textContent=msg; el.className=type; el.style.display='block'; }
+// ===== Base64 ফন্ট (সংক্ষেপিত উদাহরণ, আসলটা বড় হবে) =====
+const notoBengaliBase64 = "AAEAAAALAIAAAwAwT1Mv..."; // এখানে আসল Base64 বসবে
 
-function addHeirRow(name='', age='', rel='', note=''){
-  const tbody = document.querySelector('#heirsTable tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td class="serial"></td>
-    <td><input class="h-name" type="text" value="${sanitize(name)}"></td>
-    <td><input class="h-age" type="text" value="${sanitize(age)}"></td>
-    <td><input class="h-rel" type="text" value="${sanitize(rel)}"></td>
-    <td><input class="h-note" type="text" value="${sanitize(note)}"></td>
-    <td class="center"><button type="button" class="removeRow">Remove</button></td>`;
-  tbody.appendChild(tr);
-  tr.querySelector('.removeRow').addEventListener('click', ()=> { tr.remove(); updateSerials(); });
-  updateSerials();
+function bnNumber(num) {
+  return String(num).replace(/\d/g, d=>"০১২৩৪৫৬৭৮৯"[d]);
 }
-function updateSerials(){
-  document.querySelectorAll('#heirsTable tbody tr').forEach((tr,i)=>{
-    const cell = tr.querySelector('.serial');
-    if(cell) cell.textContent = bnNumber(i+1);
-  });
+function bnDate() {
+  const d=new Date();
+  return `${bnNumber(d.getDate())}/${bnNumber(d.getMonth()+1)}/${bnNumber(d.getFullYear())}`;
 }
-
-let fontLoaded = false;
-let fontBinaryBase64 = null;
-
-// Google Fonts থেকে TTF (CORS OK)
-const fontURL = "https://cdn.jsdelivr.net/gh/google/fonts/ofl/notosansbengali/NotoSansBengali-Regular.ttf";
-
-function arrayBufferToBase64(buffer){
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
-}
-
-async function loadFont(){
-  try {
-    const res = await fetch(fontURL);
-    if(!res.ok) throw new Error("Font fetch failed");
-    const ab = await res.arrayBuffer();
-    fontBinaryBase64 = arrayBufferToBase64(ab);
-    fontLoaded = true;
-    document.getElementById('fontStatus').textContent = "বাংলা ফন্ট সফলভাবে লোড হয়েছে ✅";
-  } catch(e){
-    document.getElementById('fontStatus').textContent = "ফন্ট লোড ব্যর্থ ❌ — বাংলা ভেঙে যেতে পারে";
-  }
-}
-loadFont();
 
 async function generatePDF(data){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF('p','pt','a4');
 
-  if(fontLoaded && fontBinaryBase64){
-    doc.addFileToVFS("NotoSansBengali-Regular.ttf", fontBinaryBase64);
-    doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
-    doc.setFont("NotoSansBengali");
-  }
+  // ফন্ট যুক্ত করা
+  doc.addFileToVFS("NotoSansBengali-Regular.ttf", notoBengaliBase64);
+  doc.addFont("NotoSansBengali-Regular.ttf", "NotoSansBengali", "normal");
+  doc.setFont("NotoSansBengali");
 
-  const margin = 40;
   let y = 40;
-  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 40;
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  try {
-    const img = new Image();
-    img.src = 'logo.png';
-    await new Promise(res=>{ img.onload=()=>{doc.addImage(img, 'PNG', margin, y, 80, 50); y+=60; res();}; img.onerror=res; });
-  } catch(e){}
-
   doc.setFontSize(16);
-  doc.text(data.formName || 'ওয়ারিশন সনদ', pageWidth/2, y, {align:'center'});
-  y += 24;
+  doc.text(`ওয়ারিশন সনদ`, pageWidth/2, y, {align: 'center'});
+  y += 20;
+
   doc.setFontSize(10);
-  doc.text(`রেফারেন্স: ${data.ref}`, margin, y); y+=16;
-  doc.text(`তারিখ: ${bnDate()}`, margin, y); y+=18;
+  doc.text(`তারিখ: ${bnDate()}`, margin, y);
+  y += 20;
 
   doc.setFontSize(12);
-  doc.text('মৃত ব্যক্তির তথ্য:', margin, y); y+=16;
+  doc.text(`মৃত ব্যক্তির তথ্য:`, margin, y);
+  y += 16;
+
   doc.setFontSize(10);
   doc.text(`নাম: ${data.deceasedName}`, margin, y);
-  doc.text(`পিতা/স্বামী: ${data.fatherName}`, margin+300, y); y+=14;
-  doc.text(`মহল্লা: ${data.mohalla}`, margin, y);
-  doc.text(`ওয়ার্ড: ${data.ward}`, margin+300, y); y+=14;
-  doc.text(`ডাকঘর: ${data.postOffice}`, margin, y);
-  doc.text(`উপজেলা/থানা: ${data.thana}`, margin+300, y); y+=14;
-  doc.text(`জেলা: ${data.district}`, margin, y); y+=20;
+  y += 14;
+  doc.text(`পিতা/স্বামী: ${data.fatherName}`, margin, y);
 
-  function drawTableHeader(){
-    doc.setFontSize(12);
-    doc.text('ওয়ারিশদের তালিকা:', margin, y); y+=16;
-    doc.setFontSize(10);
-    doc.text("ক্রমিক", margin, y);
-    doc.text("নাম", margin+40, y);
-    doc.text("বয়স", margin+300, y);
-    doc.text("সম্পর্ক", margin+350, y);
-    doc.text("মন্তব্য", margin+430, y);
-    y+=12;
-  }
-
-  drawTableHeader();
-
-  if(!data.heirs.length){
-    doc.text("কোনও ওয়ারিশ তথ্য দেওয়া হয়নি।", margin, y);
-    y+=14;
-  } else {
-    data.heirs.forEach((h, idx)=>{
-      if(y > pageHeight - 60){
-        doc.addPage();
-        y = 40;
-        drawTableHeader();
-      }
-      doc.text(bnNumber(idx+1), margin, y);
-      doc.text(doc.splitTextToSize(h.name, 250), margin+40, y);
-      doc.text(h.age, margin+300, y);
-      doc.text(h.rel, margin+350, y);
-      doc.text(doc.splitTextToSize(h.note, 150), margin+430, y);
-      y+=14;
-    });
-  }
-
-  y += 20;
-  doc.text('স্বাক্ষর: ______________________', margin, y);
-
-  if(data.phone) doc.text(`ফোন: ${data.phone}`, margin, pageHeight - 40);
-  if(data.email) doc.text(`ইমেইল: ${data.email}`, margin + 240, pageHeight - 40);
-
-  doc.save(`${data.ref}_warish.pdf`);
+  doc.save("warish.pdf");
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
-  addHeirRow();
-  document.getElementById('addHeirBtn').addEventListener('click', ()=> addHeirRow());
-
-  document.getElementById('warishForm').addEventListener('submit', e=>{
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const data = {};
-    for(const [k,v] of fd.entries()) data[k]=sanitize(v.trim());
-
-    data.heirs = [];
-    document.querySelectorAll('#heirsTable tbody tr').forEach(tr=>{
-      const name = tr.querySelector('.h-name').value.trim();
-      if(!name) return;
-      const age = tr.querySelector('.h-age').value.trim();
-      const rel = tr.querySelector('.h-rel').value.trim();
-      const note = tr.querySelector('.h-note').value.trim();
-      data.heirs.push({ name: sanitize(name), age: sanitize(age), rel: sanitize(rel), note: sanitize(note) });
-    });
-
-    data.ref = generateRef();
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = "Generating...";
-    showMsg("পিডিএফ তৈরি হচ্ছে...", "success");
-
-    setTimeout(()=>{
-      generatePDF(data).then(()=>{
-        showMsg("✅ PDF তৈরি হয়ে ডাউনলোড হয়েছে", "success");
-      }).catch(err=>{
-        console.error(err);
-        showMsg("❌ PDF তৈরিতে সমস্যা হয়েছে", "error");
-      }).finally(()=>{
-        btn.disabled = false;
-        btn.textContent = "Submit and Generate PDF";
-      });
-    },100);
-  });
+document.getElementById('warishForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = {};
+  for (const [k,v] of fd.entries()) data[k] = v.trim();
+  generatePDF(data);
 });
 </script>
+
 </body>
-  </html>
+</html>
