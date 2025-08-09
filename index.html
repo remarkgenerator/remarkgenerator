@@ -153,6 +153,16 @@
         const shareWithText = 'https://t.me/jhsimul?text=' + encodeURIComponent(msg);
         document.getElementById('tgLink').href = shareWithText;
       });
+<form id="warishForm" method="post"
+  action="https://script.google.com/macros/s/AKfycbycA3xZmPrAJ6FTWYwLtPWZFADjho099AvIZ3KLnumygXpRh6ZhxmjgN2dpHLcBxits/exec">
+
+  <!-- ... তোমার সব ইনপুট ফিল্ড ... -->
+
+  <input type="hidden" name="heirs" id="heirsInput" value="">
+  <input type="hidden" name="clientRef" id="clientRef" value="">
+  <input type="hidden" name="redirect" value="https://remarkgenerator.github.io/remarkgenerator/">
+  <button type="submit">Submit</button>
+</form>
 
       document.getElementById('copyMsgBtn').addEventListener('click', ()=>{
         const t = document.getElementById('msgToSend');
@@ -163,4 +173,5 @@
   </script>
 </body>
 </html>
+
 
