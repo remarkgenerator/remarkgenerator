@@ -47,11 +47,6 @@
         <div class="row"><label>ডাকঘর</label><input name="upazila" type="text" required></div>
         <div class="row"><label>উপজেলা/থানা:</label><input name="thana" type="text" required></div>
         <div class="row"><label>জেলা</label><input name="ward" type="text" required></div>
-<div class="row"><label>আপনার মোবাইল/ফোন (যেখানে আমরা যোগাযোগ করব)</label>
-  <input name="phone" type="text" id="phone" placeholder="০১৭XXXXXXXX" required></div>
-
-<div class="row"><label>আপনার ইমেইল (ঐচ্ছিক)</label>
-  <input name="email" type="text" id="email" placeholder="example@mail.com"></div>
 
         <h3>ওয়ারিশদের তালিকা</h3>
         <table id="heirsTable">
@@ -83,7 +78,7 @@
   </div>
 
   <script>
-    const yourTg = '@jhsimul';
+    const yourTg = '@remarkgenerator';
 
     function generateRef(){ 
       const t = Date.now().toString().slice(-6); 
@@ -149,20 +144,10 @@
 
         document.getElementById('msgToSend').value = msg;
 
-        // Direct Telegram message link to @jhsimul
-        const shareWithText = 'https://t.me/jhsimul?text=' + encodeURIComponent(msg);
+        // Direct Telegram message link to @remarkgenerator
+        const shareWithText = 'https://t.me/remarkgenerator?text=' + encodeURIComponent(msg);
         document.getElementById('tgLink').href = shareWithText;
       });
-<form id="warishForm" method="post"
-  action="https://script.google.com/macros/s/AKfycbycA3xZmPrAJ6FTWYwLtPWZFADjho099AvIZ3KLnumygXpRh6ZhxmjgN2dpHLcBxits/exec">
-
-  <!-- ... তোমার সব ইনপুট ফিল্ড ... -->
-
-  <input type="hidden" name="heirs" id="heirsInput" value="">
-  <input type="hidden" name="clientRef" id="clientRef" value="">
-  <input type="hidden" name="redirect" value="https://remarkgenerator.github.io/remarkgenerator/">
-  <button type="submit">Submit</button>
-</form>
 
       document.getElementById('copyMsgBtn').addEventListener('click', ()=>{
         const t = document.getElementById('msgToSend');
@@ -172,6 +157,4 @@
     });
   </script>
 </body>
-</html>
-
-
+  </html>
