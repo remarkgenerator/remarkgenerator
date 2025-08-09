@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ওয়ারিশন সনদ — Auto PDF & Telegram Integration</title>
+  <title>ওয়ারিশন সনদ — Auto PDF</title>
 
-  <!-- Bengali Font: Noto Sans Bengali -->
+  <!-- Bengali Font -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap" rel="stylesheet" />
 
   <!-- html2pdf.js CDN -->
@@ -93,8 +93,12 @@
       transition: background-color 0.3s ease;
       user-select: none;
     }
-    button:hover, .btn:hover {
+    button:hover:not(:disabled), .btn:hover:not(:disabled) {
       background-color: #084abf;
+    }
+    button:disabled, .btn:disabled {
+      background-color: #a1a7b3 !important;
+      cursor: not-allowed;
     }
     #heirsTable {
       width: 100%;
@@ -125,7 +129,7 @@
       font-size: 15px;
     }
     .removeRow {
-      background: #e74c3c; /* লাল রঙ থাকবে */
+      background: #e74c3c;
       padding: 6px 12px;
       border-radius: 6px;
       border: none;
@@ -161,7 +165,7 @@
         width: 100%;
       }
     }
-    /* PDF Layout Styles */
+    /* PDF Layout */
     #pdfContent {
       font-family: "Noto Sans Bengali", Arial, sans-serif;
       padding: 20px;
@@ -184,63 +188,61 @@
       text-align: left;
     }
 
-    /* Popup Styles */
-    .popup-overlay {
+    /* Popup overlay */
+    #popupOverlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 9998;
-      display: flex;
-      justify-content: center;
+      background: rgba(0,0,0,0.6);
+      display: none;
       align-items: center;
-      font-family: "Noto Sans Bengali", Arial, sans-serif;
+      justify-content: center;
+      z-index: 9999;
     }
-    .popup-box {
-      background: #fff;
-      border: 2px solid #0b5ed7;
+    #popup {
+      background: white;
+      padding: 25px 30px;
       border-radius: 10px;
-      padding: 20px;
-      width: 320px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      max-width: 450px;
+      width: 100%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
       text-align: center;
       position: relative;
-    }
-    .popup-box h3 {
-      color: #0b5ed7;
-      margin-top: 0;
-    }
-    .popup-box button {
-      margin-top: 15px;
-      padding: 8px 15px;
-      font-weight: 700;
       font-size: 15px;
-      border-radius: 6px;
-      cursor: pointer;
+      color: #222;
     }
-    .btn-copy {
-      background: #0b5ed7;
-      color: #fff;
-      border: none;
-      margin-right: 10px;
-    }
-    .btn-close {
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-    }
-    .popup-box input[type="text"] {
-      width: 90%;
-      padding: 8px;
-      font-size: 16px;
-      margin-top: 10px;
-      border: 1.8px solid #cbd5e1;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-    .error-msg {
-      color: #e74c3c;
+    #popup h2 {
+      color: #dc3545; /* warning red */
+      margin-bottom: 12px;
       font-weight: 700;
-      margin-top: 10px;
+      font-size: 22px;
+    }
+    #popup p {
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+    #popup button {
+      margin-top: 12px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+    }
+    #referenceCodeText {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      user-select: all;
+      cursor: pointer;
+      color: #0b5ed7;
+      border: 1px solid #0b5ed7;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    #copyMsg {
+      font-size: 13px;
+      color: green;
+      margin-top: 4px;
       display: none;
     }
   </style>
@@ -254,44 +256,44 @@
     </header>
 
     <main id="main-area">
-      <form id="warishForm" autocomplete="off">
+      <form id="warishForm" autocomplete="off" novalidate>
         <div class="row">
           <label for="formName">ফর্ম নাম</label>
-          <input id="formName" name="formName" type="text" required placeholder="বিভাগ জেলা উপজেলা এবং পৌরসভার নাম লিখুন" />
+          <input id="formName" name="formName" type="text" required placeholder="বিভাগ জেলা উপজেলা এবং পৌরসভার নাম লিখুন">
         </div>
         <div class="row">
           <label for="formNumber">ফর্ম নম্বর (ঐচ্ছিক)</label>
-          <input id="formNumber" name="formNumber" type="text" placeholder="যেমন: ১২৩৪৫৬" />
+          <input id="formNumber" name="formNumber" type="text" placeholder="যেমন: ১২৩৪৫৬">
         </div>
 
         <h3>মৃত ব্যক্তির তথ্য</h3>
         <div class="row">
           <label for="deceasedName">মৃত ব্যক্তির নাম</label>
-          <input id="deceasedName" name="deceasedName" type="text" required placeholder="মৃত ব্যক্তির সম্পূর্ণ নাম" />
+          <input id="deceasedName" name="deceasedName" type="text" required placeholder="মৃত ব্যক্তির সম্পূর্ণ নাম">
         </div>
         <div class="row">
           <label for="fatherName">পিতা/স্বামী</label>
-          <input id="fatherName" name="fatherName" type="text" required placeholder="পিতা অথবা স্বামীর নাম" />
+          <input id="fatherName" name="fatherName" type="text" required placeholder="পিতা অথবা স্বামীর নাম">
         </div>
         <div class="row">
           <label for="mohalla">মহল্লা</label>
-          <input id="mohalla" name="mohalla" type="text" required placeholder="মহল্লার নাম" />
+          <input id="mohalla" name="mohalla" type="text" required placeholder="মহল্লার নাম">
         </div>
         <div class="row">
           <label for="ward">ওয়ার্ড নং</label>
-          <input id="ward" name="ward" type="text" required placeholder="ওয়ার্ড নম্বর" />
+          <input id="ward" name="ward" type="text" required placeholder="ওয়ার্ড নম্বর">
         </div>
         <div class="row">
           <label for="postOffice">ডাকঘর</label>
-          <input id="postOffice" name="postOffice" type="text" required placeholder="ডাকঘরের নাম" />
+          <input id="postOffice" name="postOffice" type="text" required placeholder="ডাকঘরের নাম">
         </div>
         <div class="row">
           <label for="thana">উপজেলা/থানা</label>
-          <input id="thana" name="thana" type="text" required placeholder="উপজেলা বা থানা" />
+          <input id="thana" name="thana" type="text" required placeholder="উপজেলা বা থানা">
         </div>
         <div class="row">
           <label for="district">জেলা</label>
-          <input id="district" name="district" type="text" required placeholder="জেলার নাম" />
+          <input id="district" name="district" type="text" required placeholder="জেলার নাম">
         </div>
 
         <h3>ওয়ারিশদের তালিকা</h3>
@@ -309,355 +311,516 @@
           <tbody id="heirsBody">
             <tr>
               <td class="serial">১</td>
-              <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন" /></td>
-              <td><input type="text" name="age[]" required placeholder="বয়স" /></td>
-              <td><input type="text" name="relation[]" required placeholder="সম্পর্ক" /></td>
-              <td><input type="text" name="comment[]" placeholder="মন্তব্য" /></td>
+              <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+              <td><input type="text" name="age[]" required placeholder="বয়স"></td>
+              <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
+              <td><input type="text" name="comment[]" placeholder="মন্তব্য"></td>
               <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
             </tr>
           </tbody>
         </table>
         <button type="button" id="addHeir" class="btn" aria-label="নতুন ওয়ারিশ যুক্ত করুন">+ নতুন ওয়ারিশ যুক্ত করুন</button>
 
-        <div class="row" style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="submit" class="btn" aria-label="পিডিএফ তৈরি করুন" style="flex: 1 1 200px;">পিডিএফ তৈরি করুন</button>
-          <button type="button" id="sendTelegramBtn" class="btn" aria-label="টেলিগ্রামে তথ্য পাঠান" style="flex: 1 1 200px;">টেলিগ্রামে তথ্য পাঠান</button>
-          <button type="button" id="contactTelegramBtn" class="btn" aria-label="টেলিগ্রামে যোগাযোগ করুন" style="flex: 1 1 200px;">টেলিগ্রামে যোগাযোগ করুন</button>
+        <div class="row" style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+          <button type="submit" id="generatePdfBtn" class="btn" aria-label="পিডিএফ তৈরি করুন">পিডিএফ তৈরি করুন</button>
+          <button type="button" id="sendTelegramBtn" class="btn" aria-label="টেলিগ্রামের তথ্য পাঠান" disabled>টেলিগ্রামের তথ্য পাঠান</button>
+          <button type="button" id="contactTelegramBtn" class="btn" aria-label="টেলিগ্রামে যোগাযোগ করুন">টেলিগ্রামে যোগাযোগ করুন</button>
         </div>
       </form>
     </main>
   </div>
 
-  <!-- Popup Container -->
-  <div id="popupContainer"></div>
+  <!-- Popup Overlay -->
+  <div id="popupOverlay" role="dialog" aria-modal="true" aria-labelledby="popupTitle" aria-describedby="popupDesc">
+    <div id="popup">
+      <h2 id="popupTitle">⚠️ সতর্কতা</h2>
+      <p id="popupDesc">
+        অনুগ্রহ করে নিশ্চিত করুন যে আপনার সকল তথ্য সঠিকভাবে পূরণ করা হয়েছে। সাবমিট করার পর তথ্য সম্পাদনার সুযোগ থাকবে না। তাই সাবমিট করার পূর্বে তথ্যগুলি পুনরায় যাচাই করে নিশ্চিত হয়ে সাবমিট করুন।
+      </p>
+      <p>সাবমিট করার জন্য অপেক্ষা করুন <span id="timer">10</span> সেকেন্ড</p>
+      <button id="confirmSubmitBtn" disabled>আমি নিশ্চিত, সাবমিট করুন</button>
+    </div>
+  </div>
+
+  <!-- Reference code popup -->
+  <div id="refCodePopup" role="dialog" aria-modal="true" aria-labelledby="refCodeTitle" aria-describedby="refCodeDesc" style="display:none;">
+    <div id="popup" style="max-width: 400px;">
+      <h2 id="refCodeTitle">আপনার রেফারেন্স কোড</h2>
+      <div id="referenceCodeText" tabindex="0" role="textbox" aria-readonly="true"></div>
+      <button id="copyRefCodeBtn" class="btn" style="margin-top:5px;">কপি করুন</button>
+      <p id="copyMsg">কপি হয়েছে!</p>
+      <button id="closeRefCodePopup" class="btn" style="margin-top:15px;">বন্ধ করুন</button>
+    </div>
+  </div>
+
+  <!-- Telegram Contact popup -->
+  <div id="telegramContactPopup" role="dialog" aria-modal="true" aria-labelledby="contactTitle" aria-describedby="contactDesc" style="display:none;">
+    <div id="popup" style="max-width: 400px;">
+      <h2 id="contactTitle">টেলিগ্রামে যোগাযোগ</h2>
+      <p id="contactDesc">রেফারেন্স কোড দিন যেটা দিয়ে আপনি ফর্ম সাবমিট করেছেন:</p>
+      <input type="text" id="contactRefCodeInput" placeholder="রেফারেন্স কোড লিখুন" style="width:100%; padding:8px; margin-bottom:10px; font-size:16px; box-sizing: border-box;" />
+      <p id="contactErrorMsg" style="color:red; display:none; font-weight:700;">রেফারেন্স কোড ভুল। অনুগ্রহ করে সঠিক কোড দিন।</p>
+      <button id="contactConfirmBtn" class="btn">যোগাযোগ শুরু করুন</button>
+      <button id="contactCancelBtn" class="btn" style="margin-top:10px; background:#6c757d;">বাতিল করুন</button>
+    </div>
+  </div>
 
   <script>
-    // ক্রমিক নম্বর আপডেট ফাংশন
-    function updateSerialNumbers() {
-      const rows = document.querySelectorAll('#heirsBody tr');
-      rows.forEach((row, index) => {
-        const serialCell = row.querySelector('.serial');
-        if (serialCell) {
-          serialCell.textContent = toBanglaNumber(index + 1);
-        }
-      });
-    }
+    // --- Telegram bot config ---
+    const TELEGRAM_BOT_TOKEN = '8289822977:AAHXfya0wathSqLG2x1Xsrv-nR4ECZFhrZ0'; // তোমার বট টোকেন
+    const TELEGRAM_CHAT_ID = '8402648058'; // তোমার চ্যাট আইডি
+    const TELEGRAM_USERNAME = 'remarkgenerator'; // তোমার টেলিগ্রাম ইউজারনেম (বিনা @)
 
-    // বাংলা সংখ্যা রূপান্তর ফাংশন
+    // Helper: বাংলা সংখ্যা রূপান্তর (1 -> ১)
     function toBanglaNumber(num) {
-      const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
-      return num.toString().split('').map(d => bnDigits[+d] || d).join('');
+      const banglaDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      return num.toString().split('').map(d => banglaDigits[d] || d).join('');
     }
 
-    // নতুন ওয়ারিশ সারি যোগ করা
-    document.getElementById('addHeir').addEventListener('click', () => {
-      const tbody = document.getElementById('heirsBody');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="serial"></td>
-        <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন" /></td>
-        <td><input type="text" name="age[]" required placeholder="বয়স" /></td>
-        <td><input type="text" name="relation[]" required placeholder="সম্পর্ক" /></td>
-        <td><input type="text" name="comment[]" placeholder="মন্তব্য" /></td>
-        <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
-      `;
-      tbody.appendChild(tr);
-      updateSerialNumbers();
-    });
+    // সিরিয়াল আপডেট ফাংশন
+    function updateSerials() {
+      const serialCells = document.querySelectorAll('#heirsBody .serial');
+      serialCells.forEach((cell, i) => {
+        cell.textContent = toBanglaNumber(i + ১);
+      });
+    }
 
-    // সারি মুছার ইভেন্ট ডেলিগেশন
-    document.getElementById('heirsBody').addEventListener('click', (e) => {
-      if (e.target.classList.contains('removeRow')) {
-        const tbody = document.getElementById('heirsBody');
-        if (tbody.rows.length > 1) {
-          e.target.closest('tr').remove();
-          updateSerialNumbers();
-        } else {
-          alert('কমপক্ষে একটি ওয়ারিশের তথ্য থাকতে হবে।');
+    // Initialize heirs table serial and remove button events
+    function initHeirsTable() {
+      updateSerials();
+
+      // Add remove event delegation
+      document.getElementById('heirsBody').addEventListener('click', e => {
+        if (e.target.classList.contains('removeRow')) {
+          const tbody = document.getElementById('heirsBody');
+          if (tbody.rows.length> 1) {
+            e.target.closest('tr').remove();
+            updateSerials();
+          } else {
+            alert('সর্বনিম্ন একটি ওয়ারিশ থাকা আবশ্যক।');
+          }
         }
-      }
-    });
-
-    // PDF তৈরি ও ডাউনলোড
-    document.getElementById('warishForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      // তথ্য সংগ্রহ
-      const formName = document.getElementById('formName').value;
-      const formNumber = document.getElementById('formNumber').value;
-      const deceasedName = document.getElementById('deceasedName').value;
-      const fatherName = document.getElementById('fatherName').value;
-      const mohalla = document.getElementById('mohalla').value;
-      const ward = document.getElementById('ward').value;
-      const postOffice = document.getElementById('postOffice').value;
-      const thana = document.getElementById('thana').value;
-      const district = document.getElementById('district').value;
-
-      const heirNames = document.getElementsByName('heirName[]');
-      const ages = document.getElementsByName('age[]');
-      const relations = document.getElementsByName('relation[]');
-      const comments = document.getElementsByName('comment[]');
-
-      const heirs = [];
-      for(let i=0; i<heirNames.length; i++) {
-        heirs.push({
-          name: heirNames[i].value.trim(),
-          age: ages[i].value.trim(),
-          relation: relations[i].value.trim(),
-          comment: comments[i].value.trim() || '-',
-        });
-      }
-
-      // PDF HTML Content
-      let html = `
-        <h1>${formName}</h1>
-        ${formNumber ? `<p><strong>ফর্ম নম্বর:</strong> ${formNumber}</p>` : ''}
-        <h3>মৃত ব্যক্তির তথ্য</h3>
-        <p><strong>নাম:</strong> ${deceasedName}</p>
-        <p><strong>পিতা/স্বামী:</strong> ${fatherName}</p>
-        <p><strong>মহল্লা:</strong> ${mohalla}</p>
-        <p><strong>ওয়ার্ড নং:</strong> ${ward}</p>
-        <p><strong>ডাকঘর:</strong> ${postOffice}</p>
-        <p><strong>উপজেলা/থানা:</strong> ${thana}</p>
-        <p><strong>জেলা:</strong> ${district}</p>
-
-        <h3>ওয়ারিশদের তালিকা</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ক্রমিক</th>
-              <th>নাম</th>
-              <th>বয়স</th>
-              <th>সম্পর্ক</th>
-              <th>মন্তব্য</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      heirs.forEach((h, i) => {
-        html += `
-          <tr>
-            <td>${toBanglaNumber(i+1)}</td>
-            <td>${h.name}</td>
-            <td>${h.age}</td>
-            <td>${h.relation}</td>
-            <td>${h.comment}</td>
-          </tr>
-        `;
       });
 
-      html += `
-          </tbody>
-        </table>
-        <p style="margin-top: 30px;">এই সনদটি ওয়ারিশদের তালিকা হিসেবে প্রস্তুত করা হয়েছে।</p>
-      `;
+      // Add new heir
+      document.getElementById('addHeir').addEventListener('click', () => {
+        const tbody = document.getElementById('heirsBody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+          <td class="serial"></td>
+          <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+          <td><input type="text" name="age[]" required placeholder="বয়স"></td>
+          <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
+          <td><input type="text" name="comment[]" placeholder="মন্তব্য"></td>
+          <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
+        `;
+        tbody.appendChild(newRow);
+        updateSerials();
+      });
+    }
 
-      const pdfContent = document.createElement('div');
-      pdfContent.id = 'pdfContent';
-      pdfContent.innerHTML = html;
+    // বাংলা অক্ষর ছাড়া ইনপুট নিষিদ্ধ
+    function isValidBangla(text) {
+      // অনুমোদিত: বাংলা, ইংরেজি সংখ্যা, স্পেস, কমা, ডট, হাইফেন, ্, ং, ঃ, ঁ
+      const regex = /^[\u0980-\u09FF0-9 ,.\-্ংঃঁ]*$/;
+      return regex.test(text);
+    }
 
-      const opt = {
-        margin:       0.5,
-        filename:     'warish_sondho.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
+    // কপি ফাংশন (Clipboard API)
+    function copyToClipboard(text) {
+      if (navigator.clipboard) {
+        return navigator.clipboard.writeText(text);
+      } else {
+        // fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        return Promise.resolve();
+      }
+    }
 
-      html2pdf().set(opt).from(pdfContent).save();
-    });
-
-    // রেফারেন্স কোড জেনারেটর (10 ডিজিটের এলফানিউমেরিক)
+    // রেফারেন্স কোড জেনারেট (10 ডিজিট, অক্ষর+সংখ্যা)
     function generateReferenceCode() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = '';
+      let code = '';
       for (let i = 0; i < 10; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      return result;
+      return code;
     }
 
-    // Popup তৈরি ও দেখানোর ফাংশন
-    function showPopup(contentHtml) {
-      // যদি আগের popup থেকে থাকে, তা মুছে ফেলবো
-      const container = document.getElementById('popupContainer');
-      container.innerHTML = '';
+    // টেলিগ্রাম মেসেজ পাঠানো
+    async function sendTelegramMessage(message) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      const params = new URLSearchParams({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'HTML',
+      });
 
-      const overlay = document.createElement('div');
-      overlay.className = 'popup-overlay';
-
-      const box = document.createElement('div');
-      box.className = 'popup-box';
-      box.innerHTML = contentHtml;
-
-      overlay.appendChild(box);
-      container.appendChild(overlay);
-
-      // ক্লোজ বাটন বা কপি বাটনের ইভেন্ট হ্যান্ডলার সংযুক্তি
-      const btnClose = box.querySelector('.btn-close');
-      if (btnClose) {
-        btnClose.addEventListener('click', () => {
-          container.innerHTML = '';
-        });
-      }
-      const btnCopy = box.querySelector('.btn-copy');
-      if (btnCopy) {
-        btnCopy.addEventListener('click', () => {
-          const refInput = box.querySelector('#refCodeInput');
-          if (refInput) {
-            refInput.select();
-            refInput.setSelectionRange(0, 99999); // মোবাইলের জন্য
-            navigator.clipboard.writeText(refInput.value).then(() => {
-              alert('রেফারেন্স কোড কপি করা হয়েছে!');
-            });
-          }
-        });
+      try {
+        const res = await fetch(url, { method: 'POST', body: params });
+        const data = await res.json();
+        return data.ok;
+      } catch (e) {
+        return false;
       }
     }
 
-    // টেলিগ্রামে তথ্য পাঠানোর বাটন ক্লিক ইভেন্ট
-    document.getElementById('sendTelegramBtn').addEventListener('click', () => {
-      // প্রথমে ফর্মের তথ্য যাচাই করব
+    // ইনপুট ফিল্ড গুলো থেকে তথ্য সংগ্রহ
+    function gatherFormData() {
       const form = document.getElementById('warishForm');
-      if (!form.checkValidity()) {
-        alert('দয়া করে ফর্মের সব বাধ্যতামূলক তথ্য সঠিকভাবে পূরণ করুন।');
-        form.reportValidity();
-        return;
-      }
 
-      // রেফারেন্স কোড জেনারেট
-      const refCode = generateReferenceCode();
+      const data = {
+        formName: form.formName.value.trim(),
+        formNumber: form.formNumber.value.trim(),
+        deceasedName: form.deceasedName.value.trim(),
+        fatherName: form.fatherName.value.trim(),
+        mohalla: form.mohalla.value.trim(),
+        ward: form.ward.value.trim(),
+        postOffice: form.postOffice.value.trim(),
+        thana: form.thana.value.trim(),
+        district: form.district.value.trim(),
+        heirs: []
+      };
 
-      // ফর্ম ডাটা সংগ্রহ
-      const formName = document.getElementById('formName').value;
-      const formNumber = document.getElementById('formNumber').value;
-      const deceasedName = document.getElementById('deceasedName').value;
-      const fatherName = document.getElementById('fatherName').value;
-      const mohalla = document.getElementById('mohalla').value;
-      const ward = document.getElementById('ward').value;
-      const postOffice = document.getElementById('postOffice').value;
-      const thana = document.getElementById('thana').value;
-      const district = document.getElementById('district').value;
+      const names = form.querySelectorAll('input[name="heirName[]"]');
+      const ages = form.querySelectorAll('input[name="age[]"]');
+      const relations = form.querySelectorAll('input[name="relation[]"]');
+      const comments = form.querySelectorAll('input[name="comment[]"]');
 
-      const heirNames = document.getElementsByName('heirName[]');
-      const ages = document.getElementsByName('age[]');
-      const relations = document.getElementsByName('relation[]');
-      const comments = document.getElementsByName('comment[]');
-
-      let heirsText = '';
-      for (let i = 0; i < heirNames.length; i++) {
-        heirsText += `${toBanglaNumber(i+1)}. নাম: ${heirNames[i].value.trim()}, বয়স: ${ages[i].value.trim()}, সম্পর্ক: ${relations[i].value.trim()}, মন্তব্য: ${comments[i].value.trim() || '-'}\n`;
-      }
-
-      // Telegram Bot Token এবং Chat ID (তোমার তথ্য বসাও)
-      const telegramBotToken = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
-      const telegramChatId = 'YOUR_TELEGRAM_CHAT_ID_HERE';
-
-      // Telegram message text
-      const messageText = `
-📝 *ওয়ারিশন সনদ তথ্য*  
-*রেফারেন্স কোড:* \`${refCode}\`  
-*ফর্ম নাম:* ${formName}  
-*ফর্ম নম্বর:* ${formNumber || '-'}  
-*মৃত ব্যক্তির নাম:* ${deceasedName}  
-*পিতা/স্বামী:* ${fatherName}  
-*ঠিকানা:* মহল্লা: ${mohalla}, ওয়ার্ড: ${ward}, ডাকঘর: ${postOffice}, থানা: ${thana}, জেলা: ${district}
-
-*ওয়ারিশদের তালিকা:*  
-${heirsText}
-      `;
-
-      // Telegram API URL (URL encode message)
-      const telegramUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage?chat_id=${telegramChatId}&parse_mode=Markdown&text=${encodeURIComponent(messageText)}`;
-
-      // Telegram API কল (fetch)
-      fetch(telegramUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data.ok) {
-            // সফল হলে popup দেখাবে রেফারেন্স কোড সহ
-            showPopup(`
-              <h3>তথ্য পাঠানো হয়েছে!</h3>
-              <p>আপনার রেফারেন্স কোড নিচে দেওয়া হলো। এটি সংরক্ষণ করুন এবং প্রয়োজনে ব্যবহার করুন।</p>
-              <input type="text" id="refCodeInput" readonly value="${refCode}" />
-              <button class="btn-copy">কপি করুন</button>
-              <button class="btn-close">বন্ধ করুন</button>
-            `);
-          } else {
-            alert('টেলিগ্রামে তথ্য পাঠাতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।');
-          }
-        })
-        .catch(() => {
-          alert('টেলিগ্রামে তথ্য পাঠাতে সমস্যা হয়েছে। পরে আবার চেষ্টা করুন।');
+      for (let i = 0; i < names.length; i++) {
+        data.heirs.push({
+          name: names[i].value.trim(),
+          age: ages[i].value.trim(),
+          relation: relations[i].value.trim(),
+          comment: comments[i].value.trim()
         });
-    });
+      }
 
-    // টেলিগ্রামে যোগাযোগের বাটন ক্লিক ইভেন্ট
-    document.getElementById('contactTelegramBtn').addEventListener('click', () => {
-      // রেফারেন্স কোড ইনপুট সহ popup দেখানো
-      showPopup(`
-        <h3>টেলিগ্রামে যোগাযোগ করুন</h3>
-        <p>অনুগ্রহ করে আপনার রেফারেন্স কোড দিন:</p>
-        <input type="text" id="refInput" placeholder="রেফারেন্স কোড লিখুন" />
-        <p class="error-msg" id="refError">রেফারেন্স কোড ভুল। সঠিক কোড দিন।</p>
-        <button id="btnVerifyRef" class="btn" style="margin-top:10px;">যাচাই করুন</button>
-        <button class="btn-close" style="margin-top:10px;">বন্ধ করুন</button>
-      `);
+      return data;
+    }
 
-      // ইভেন্ট হ্যান্ডলার যোগ করা
-      const container = document.getElementById('popupContainer');
-      const btnVerify = container.querySelector('#btnVerifyRef');
-      const inputRef = container.querySelector('#refInput');
-      const errorMsg = container.querySelector('#refError');
+    // ফর্মের ইনপুট গুলো বাংলা আছে কিনা চেক
+    function validateBanglaInputs() {
+      const form = document.getElementById('warishForm');
+      const fields = [
+        form.formName,
+        form.formNumber,
+        form.deceasedName,
+        form.fatherName,
+        form.mohalla,
+        form.ward,
+        form.postOffice,
+        form.thana,
+        form.district,
+        ...form.querySelectorAll('input[name="heirName[]"]'),
+        ...form.querySelectorAll('input[name="age[]"]'),
+        ...form.querySelectorAll('input[name="relation[]"]'),
+        ...form.querySelectorAll('input[name="comment[]"]'),
+      ];
 
-      btnVerify.addEventListener('click', () => {
-        const enteredRef = inputRef.value.trim().toUpperCase();
-        if (!enteredRef) {
+      for (const field of fields) {
+        if (field.value.trim() !== '' && !isValidBangla(field.value.trim())) {
+          alert('অনুগ্রহ করে শুধুমাত্র বাংলা ভাষায় ইনপুট দিন এবং বৈধ অক্ষর ব্যবহার করুন।');
+          field.focus();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // পিডিএফ কনটেন্ট তৈরি
+    function createPdfContent(data, refCode) {
+      let heirsHtml = '';
+      data.heirs.forEach((h, i) => {
+        heirsHtml += `<tr>
+          <td style="width:5%;">${toBanglaNumber(i + 1)}</td>
+          <td style="width:30%;">${h.name || ''}</td>
+          <td style="width:15%;">${h.age || ''}</td>
+          <td style="width:25%;">${h.relation || ''}</td>
+          <td style="width:25%;">${h.comment || ''}</td>
+        </tr>`;
+      });
+
+      return `
+        <div id="pdfContent">
+          <h1>ওয়ারিশন সনদ</h1>
+          <p><strong>ফর্ম নাম:</strong> ${data.formName}</p>
+          <p><strong>ফর্ম নম্বর:</strong> ${data.formNumber || '-'}</p>
+          <h3>মৃত ব্যক্তির তথ্য</h3>
+          <p><strong>নাম:</strong> ${data.deceasedName}</p>
+          <p><strong>পিতা/স্বামী:</strong> ${data.fatherName}</p>
+          <p><strong>মহল্লা:</strong> ${data.mohalla}</p>
+          <p><strong>ওয়ার্ড নং:</strong> ${data.ward}</p>
+          <p><strong>ডাকঘর:</strong> ${data.postOffice}</p>
+          <p><strong>থানা/উপজেলা:</strong> ${data.thana}</p>
+          <p><strong>জেলা:</strong> ${data.district}</p>
+          <h3>ওয়ারিশদের তালিকা</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ক্রমিক</th>
+                <th>নাম</th>
+                <th>বয়স</th>
+                <th>সম্পর্ক</th>
+                <th>মন্তব্য</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${heirsHtml}
+            </tbody>
+          </table>
+          <p><strong>রেফারেন্স কোড:</strong> ${refCode}</p>
+        </div>
+      `;
+    }
+
+    // পিডিএফ জেনারেট
+    function generatePdf(data, refCode) {
+      return new Promise((resolve, reject) => {
+        const element = document.createElement('div');
+        element.innerHTML = createPdfContent(data, refCode);
+
+        html2pdf()
+          .set({
+            margin: 10,
+            filename: `WarishCertificate_${refCode}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          })
+          .from(element)
+          .save()
+          .then(() => resolve())
+          .catch(err => reject(err));
+      });
+    }
+
+    // রেফারেন্স কোড পপআপ দেখানো
+    function showReferenceCodePopup(code) {
+      const popup = document.getElementById('refCodePopup');
+      const codeText = document.getElementById('referenceCodeText');
+      const copyMsg = document.getElementById('copyMsg');
+
+      codeText.textContent = code;
+      copyMsg.style.display = 'none';
+      popup.style.display = 'flex';
+
+      // Copy button
+      document.getElementById('copyRefCodeBtn').onclick = () => {
+        copyToClipboard(code).then(() => {
+          copyMsg.style.display = 'block';
+          setTimeout(() => {
+            copyMsg.style.display = 'none';
+          }, 2000);
+        });
+      };
+
+      // Close popup
+      document.getElementById('closeRefCodePopup').onclick = () => {
+        popup.style.display = 'none';
+      };
+
+      // Allow keyboard copy
+      codeText.onclick = () => {
+        copyToClipboard(code).then(() => {
+          copyMsg.style.display = 'block';
+          setTimeout(() => {
+            copyMsg.style.display = 'none';
+          }, 2000);
+        });
+      };
+    }
+
+    // সতর্কতা (warning) popup দেখানো
+    function showWarningPopup(onConfirm) {
+      const overlay = document.getElementById('popupOverlay');
+      const confirmBtn = document.getElementById('confirmSubmitBtn');
+      const timerSpan = document.getElementById('timer');
+
+      let timeLeft = 10;
+      confirmBtn.disabled = true;
+      timerSpan.textContent = timeLeft;
+
+      overlay.style.display = 'flex';
+
+      const intervalId = setInterval(() => {
+        timeLeft--;
+        timerSpan.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(intervalId);
+          confirmBtn.disabled = false;
+        }
+      }, 1000);
+
+      function cleanup() {
+        overlay.style.display = 'none';
+        confirmBtn.removeEventListener('click', onClick);
+      }
+
+      function onClick() {
+        cleanup();
+        onConfirm();
+      }
+
+      confirmBtn.addEventListener('click', onClick);
+    }
+
+    // টেলিগ্রাম যোগাযোগ popup
+    function showTelegramContactPopup(onSuccess) {
+      const popup = document.getElementById('telegramContactPopup');
+      const input = document.getElementById('contactRefCodeInput');
+      const errorMsg = document.getElementById('contactErrorMsg');
+      const confirmBtn = document.getElementById('contactConfirmBtn');
+      const cancelBtn = document.getElementById('contactCancelBtn');
+
+      errorMsg.style.display = 'none';
+      input.value = '';
+      popup.style.display = 'flex';
+
+      function cleanup() {
+        popup.style.display = 'none';
+        confirmBtn.removeEventListener('click', onConfirmClick);
+        cancelBtn.removeEventListener('click', onCancelClick);
+      }
+
+      function onConfirmClick() {
+        const val = input.value.trim().toUpperCase();
+        if (val === lastReferenceCode) {
+          cleanup();
+          onSuccess();
+        } else {
           errorMsg.style.display = 'block';
-          errorMsg.textContent = 'অনুগ্রহ করে রেফারেন্স কোড দিন।';
+          input.focus();
+        }
+      }
+
+      function onCancelClick() {
+        cleanup();
+      }
+
+      confirmBtn.addEventListener('click', onConfirmClick);
+      cancelBtn.addEventListener('click', onCancelClick);
+    }
+
+    // --- Variables to track state ---
+    let lastReferenceCode = '';
+    let telegramMessageSent = false;
+    let pdfGenerated = false;
+
+    // Initialize form handlers
+    function initForm() {
+      initHeirsTable();
+
+      const form = document.getElementById('warishForm');
+      const generatePdfBtn = document.getElementById('generatePdfBtn');
+      const sendTelegramBtn = document.getElementById('sendTelegramBtn');
+      const contactTelegramBtn = document.getElementById('contactTelegramBtn');
+
+      // পিডিএফ তৈরি
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        if (!validateBanglaInputs()) return;
+
+        // Warning popup before PDF generate
+        showWarningPopup(async () => {
+          generatePdfBtn.disabled = true;
+          sendTelegramBtn.disabled = true;
+
+          const data = gatherFormData();
+          lastReferenceCode = generateReferenceCode();
+
+          try {
+            await generatePdf(data, lastReferenceCode);
+            pdfGenerated = true;
+            alert('পিডিএফ সফলভাবে তৈরি হয়েছে। এখন টেলিগ্রামে তথ্য পাঠাতে পারবেন।');
+
+            // রেফারেন্স কোড দেখাও
+            showReferenceCodePopup(lastReferenceCode);
+
+            // টেলিগ্রাম বাটন সক্রিয় করো
+            sendTelegramBtn.disabled = false;
+            // টেলিগ্রাম যোগাযোগ বাটন সবসময় সক্রিয় থাকবে, তাই কিছু না করো
+
+          } catch (error) {
+            alert('পিডিএফ তৈরিতে সমস্যা হয়েছে, অনুগ্রহ করে আবার চেষ্টা করুন।');
+            pdfGenerated = false;
+            sendTelegramBtn.disabled = true;
+          }
+          generatePdfBtn.disabled = false;
+        });
+      });
+
+      // টেলিগ্রামে তথ্য পাঠাও
+      sendTelegramBtn.addEventListener('click', async () => {
+        if (!pdfGenerated) {
+          alert('প্রথমে পিডিএফ তৈরি করুন।');
+          return;
+        }
+        if (telegramMessageSent) {
+          alert('তথ্য ইতিমধ্যে টেলিগ্রামে পাঠানো হয়েছে।');
           return;
         }
 
-        // এখানে তোমার রেফারেন্স কোড ভেরিফিকেশন করতে হবে
-        // এই উদাহরণে শুধু সাম্প্রতিক জেনারেট হওয়া রেফারেন্স কোড যাচাই করছি
-        // বাস্তবে সার্ভার সাইড থেকে বা লোকাল স্টোরেজ থেকে যাচাই করতে হবে
-        // আমরা একটা সহজ ভেরিফিকেশন হিসেবে নিচ্ছি:
+        const data = gatherFormData();
 
-        // লোকালি সংরক্ষিত refCode থেকে যাচাই (এই উদাহরণে গ্লোবাল ভ্যারিয়েবল)
-        if (enteredRef === window.lastGeneratedRefCode) {
-          errorMsg.style.display = 'none';
-          // ক্লোজ popup
-          container.innerHTML = '';
-          // তোমার টেলিগ্রাম ইউজারনেম (যেখানে যেতে হবে)
-          const telegramUser = 'YOUR_TELEGRAM_USERNAME_HERE'; // @সহ লিখবে না
-          // লিঙ্ক তৈরি
-          const telegramLink = `https://t.me/${telegramUser}`;
-          // ব্রাউজারে লিঙ্ক ওপেন
-          window.open(telegramLink, '_blank');
+        // মেসেজ তৈরি
+        let message = `<b>ওয়ারিশন সনদ তথ্য</b>\n`;
+        message += `ফর্ম নাম: ${data.formName}\n`;
+        message += `ফর্ম নম্বর: ${data.formNumber || '-'}\n\n`;
+        message += `মৃত ব্যক্তির নাম: ${data.deceasedName}\n`;
+        message += `পিতা/স্বামী: ${data.fatherName}\n`;
+        message += `মহল্লা: ${data.mohalla}\n`;
+        message += `ওয়ার্ড নং: ${data.ward}\n`;
+        message += `ডাকঘর: ${data.postOffice}\n`;
+        message += `থানা/উপজেলা: ${data.thana}\n`;
+        message += `জেলা: ${data.district}\n\n`;
+        message += `ওয়ারিশদের তালিকা:\n`;
+        data.heirs.forEach((h, i) => {
+          message += `${i + 1}. নাম: ${h.name}, বয়স: ${h.age}, সম্পর্ক: ${h.relation}, মন্তব্য: ${h.comment || '-'}\n`;
+        });
+        message += `\nরেফারেন্স কোড: ${lastReferenceCode}`;
+
+        sendTelegramBtn.disabled = true;
+        sendTelegramBtn.textContent = 'পাঠানো হচ্ছে...';
+
+        const sent = await sendTelegramMessage(message);
+
+        if (sent) {
+          telegramMessageSent = true;
+          alert('তথ্য সফলভাবে টেলিগ্রামে পাঠানো হয়েছে।');
+          sendTelegramBtn.textContent = 'টেলিগ্রামের তথ্য পাঠানো হয়েছে';
+          // শুধুমাত্র টেলিগ্রাম তথ্য পাঠান বাটন ডিজেবল, বাকি বাটন সক্রিয় থাকবে
         } else {
-          errorMsg.style.display = 'block';
-          errorMsg.textContent = 'রেফারেন্স কোড ভুল। সঠিক কোড দিন।';
+          alert('টেলিগ্রামে তথ্য পাঠাতে সমস্যা হয়েছে। অনুগ্রহ করে পরে চেষ্টা করুন।');
+          sendTelegramBtn.disabled = false;
+          sendTelegramBtn.textContent = 'টেলিগ্রামের তথ্য পাঠান';
         }
       });
-    });
 
-    // সাইট লোড হলে ক্রমিক নাম্বার আপডেট
-    updateSerialNumbers();
-
-    // গ্লোবাল ভ্যারিয়েবল রেফারেন্স কোড স্টোর করার জন্য
-    window.lastGeneratedRefCode = '';
-
-    // রেফারেন্স কোড জেনারেট হওয়ার সময় গ্লোবাল ভ্যারিয়েবল আপডেট হবে
-    function generateReferenceCode() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let result = '';
-      for (let i = 0; i < 10; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      window.lastGeneratedRefCode = result; // গ্লোবাল এ রাখা হবে
-      return result;
+      // টেলিগ্রামে যোগাযোগ করুন বাটন
+      contactTelegramBtn.addEventListener('click', () => {
+        if (!lastReferenceCode) {
+          alert('প্রথমে ফর্ম সাবমিট করুন এবং রেফারেন্স কোড পান।');
+          return;
+        }
+        showTelegramContactPopup(() => {
+          // সঠিক রেফারেন্স কোড এন্টার করলে এই লিংকে নিয়ে যাবে
+          const tgLink = `https://t.me/${TELEGRAM_USERNAME}`;
+          window.open(tgLink, '_blank', 'noopener');
+        });
+      });
     }
+
+    // ডকুমেন্ট রেডি হলে শুরু করো
+    document.addEventListener('DOMContentLoaded', () => {
+      initForm();
+    });
   </script>
 </body>
 </html>
