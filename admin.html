@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Generate Warish PDF</title>
+  <style>
+    body{font-family: "Noto Sans Bengali", Arial, sans-serif;background:#f7f7f7;padding:20px}
+    .box{max-width:900px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+    textarea,input{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
+    button{background:#0b5ed7;color:#fff;padding:8px 12px;border:none;border-radius:6px}
+    .muted{color:#666;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Admin — Generate Warish PDF</h2>
+    <p class="muted">Customer-রা Telegram-এ পাঠানো message (Copy করে) এখানে পেস্ট করুন অথবা নিচে ফর্মে সরাসরি ভরুন।</p>
+
+    <label>Customer Message (paste here)</label>
+    <textarea id="rawData" rows="8"></textarea><br><br>
+
+    <p class="muted">অথবা নিচে সরাসরি ফর্ম পূরণ করে Generate করুন:</p>
+    <form id="adminForm">
+      <input name="formName" placeholder="ফর্ম নাম (ওয়ারিশন সনদ)" value="ওয়ারিশন সনদ"><br><br>
+      <input name="formNumber" placeholder="ফর্ম নম্বর (ঐচ্ছিক)"><br><br>
+      <input name="deceasedName" placeholder="মৃত ব্যক্তির নাম"><br><br>
+      <input name="fatherName" placeholder="পিতার নাম/স্বামীর নাম"><br><br>
+      <input name="mohalla" placeholder="মহল্লা"><br><br>
+      <input name="postOffice" placeholder="ডাকঘর"><br><br>
+      <input name="upazila" placeholder="উপজেলা/জেলা"><br><br>
+      <input name="thana" placeholder="থানা"><br><br>
+      <input name="ward" placeholder="ওয়ার্ড"><br><br>
+      <label>ওয়ারিশ তালিকা (প্রতি লাইনে: নাম|বয়স|সম্পর্ক|মন্তব্য)</label>
+      <textarea id="heirsRaw" rows="6" placeholder="উদাহরণ: শামিম|45|পুত্র| -"></textarea><br><br>
+      <button type="button" id="generatePdfBtn">Generate PDF</button>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // parse raw message if provided, else use admin form fields
+    function parseRaw(raw){
+      const lines = raw.split('\n').map(s=>s.trim()).filter(Boolean);
+      const obj = {heirs:[]};
+      lines.forEach(l=>{
+        if(l.startsWith('রেফারেন্স:')) obj.ref = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('মৃত ব্যক্তির নাম:')) obj.deceasedName = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('পিতার নাম')||l.startsWith('পিতার নাম/')) obj.fatherName = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('মহল্লা:')) obj.mohalla = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('ডাকঘর:')) obj.postOffice = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('উপজেলা')||l.startsWith('উপজেলা/')) obj.upazila = l.split(':').slice(1).join(':').trim();
+        else if(l.startsWith('থানা:')) obj.thana = l.split(':').slice(1).join(':').trim();
+        else if(l.match(/^\d+\./)){
+          // heir line
+          const parts = l.replace(/^\d+\.\s*/,'').split('|').map(s=>s.trim());
+          const h = {name: parts[0]||'', age: parts[1]||'', rel: parts[2]||'', note: parts[3]||''};
+          if(h.name) obj.heirs.push(h);
+        }
+      });
+      return obj;
+    }
+
+    async function generatePDFfromObject(data){
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p','pt','a4');
+      const margin = 40; let y = 60;
+
+      // optional: add logo if exists at /logo.png
+      await new Promise(res=>{
+        const img = new Image();
+        img.src = './logo.png';
+        img.onload = ()=>{ try{ doc.addImage(img,'PNG',margin,20,80,50); }catch(e){}; res(); };
+        img.onerror = ()=> res();
+      });
+
+      doc.setFontSize(16);
+      doc.text(data.formName||'ওয়ারিশন সনদ', 300, 60, {align:'center'});
+
+      doc.setFontSize(11);
+      y = 110;
+      if(data.ref) { doc.text(`রেফারেন্স: ${data.ref}`, margin, y); y+=18; }
+      doc.text(`মৃত ব্যক্তির নাম: ${data.deceasedName||''}`, margin, y); y+=16;
+      doc.text(`পিতার নাম/স্বামী: ${data.fatherName||''}`, margin, y); y+=16;
+      doc.text(`মহল্লা: ${data.mohalla||''}`, margin, y); y+=16;
+      doc.text(`ডাকঘর: ${data.postOffice||''}`, margin, y); y+=16;
+      doc.text(`উপজেলা/জেলা: ${data.upazila||''}`, margin, y); y+=16;
+      doc.text(`থানা: ${data.thana||''}`, margin, y); y+=16;
+      doc.text(`ওয়ার্ড: ${data.ward||''}`, margin, y); y+=26;
+
+      doc.setFontSize(12);
+      doc.text('ওয়ারিশদের তালিকা:', margin, y); y+=16;
+
+      data.heirs = data.heirs || [];
+      data.heirs.forEach((h, idx)=> {
+        doc.text(`${idx+1}. ${h.name} — বয়স: ${h.age} — সম্পর্ক: ${h.rel} ${h.note?('- '+h.note):''}`, margin+6, y);
+        y+=14;
+        if(y > 750){ doc.addPage(); y = 40; }
+      });
+
+      y+=30;
+      doc.text('স্বাক্ষর: ______________________', margin, y);
+
+      const fileName = (data.ref ? data.ref+'_warish.pdf' : 'warish.pdf');
+      doc.save(fileName);
+    }
+
+    document.getElementById('generatePdfBtn').addEventListener('click', ()=>{
+      const raw = document.getElementById('rawData').value.trim();
+      let obj = {heirs:[]};
+      if(raw) obj = Object.assign(obj, parseRaw(raw));
+      else {
+        const f = document.getElementById('adminForm');
+        const fd = new FormData(f);
+        obj.formName = fd.get('formName'); obj.formNumber = fd.get('formNumber');
+        obj.deceasedName = fd.get('deceasedName'); obj.fatherName = fd.get('fatherName');
+        obj.mohalla = fd.get('mohalla'); obj.postOffice = fd.get('postOffice');
+        obj.upazila = fd.get('upazila'); obj.thana = fd.get('thana'); obj.ward = fd.get('ward');
+        const heirsRaw = document.getElementById('heirsRaw').value.trim();
+        if(heirsRaw){
+          heirsRaw.split('\n').forEach(line=>{
+            const parts = line.split('|').map(s=>s.trim());
+            const h = {name: parts[0]||'', age: parts[1]||'', rel: parts[2]||'', note: parts[3]||''};
+            if(h.name) obj.heirs.push(h);
+          });
+        }
+      }
+      generatePDFfromObject(obj);
+    });
+  </script>
+</body>
+  </html>
