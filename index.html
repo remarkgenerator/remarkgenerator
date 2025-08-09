@@ -13,7 +13,7 @@
     .small{color:#666;font-size:13px}
     .row{margin-bottom:10px}
     label{display:block;font-weight:700;margin-bottom:6px}
-    input[type=text], input[type=email], textarea, select {width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:15px}
+    input[type=text], textarea, select {width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:15px}
     button, .btn{background:#0b5ed7;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
     #heirsTable{width:100%;border-collapse:collapse;margin:10px 0}
     #heirsTable th,#heirsTable td{border:1px solid #e0e0e0;padding:6px;text-align:left}
@@ -29,14 +29,13 @@
     <header>
       <img id="logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
       <h1>ওয়ারিশন সনদ ফর্ম</h1>
-      <p class="small">১. তথ্য দিন → ২. Submit → ৩. Telegram-এ যোগাযোগ করুন</p>
+      <p class="small"> ১. তথ্য দিন
+        ২. Submit 
+        ৩. Telegram-এ যোগাযোগ করুন </p>
     </header>
 
     <main id="main-area">
-      <form id="warishForm" action="https://script.google.com/macros/s/আপনার_AppsScript_URL/exec" method="POST">
-        <input type="hidden" name="telegram_user" value="@remarkgenerator">
-        <input type="hidden" name="redirect" value="https://thankyoupage.com">
-
+      <form id="warishForm">
         <div class="row"><label>ফর্ম নাম</label><input name="formName" type="text" value="ওয়ারিশন সনদ" required></div>
         <div class="row"><label>ফর্ম নম্বর (ঐচ্ছিক)</label><input name="formNumber" type="text"></div>
 
@@ -48,11 +47,6 @@
         <div class="row"><label>ডাকঘর</label><input name="upazila" type="text" required></div>
         <div class="row"><label>উপজেলা/থানা:</label><input name="thana" type="text" required></div>
         <div class="row"><label>জেলা</label><input name="ward" type="text" required></div>
-
-        <h3>আপনার যোগাযোগের তথ্য</h3>
-        <div class="row"><label>আপনার নাম</label><input type="text" name="name" placeholder="Your Name" required></div>
-        <div class="row"><label>আপনার ইমেইল</label><input type="email" name="email" placeholder="Your Email" required></div>
-        <div class="row"><label>বার্তা</label><textarea name="message" placeholder="Your Message" required></textarea></div>
 
         <h3>ওয়ারিশদের তালিকা</h3>
         <table id="heirsTable">
@@ -70,7 +64,7 @@
 
       <div id="pendingArea" style="display:none;">
         <h3>Payment Pending</h3>
-        <p class="muted">অনুগ্রহ করে পেমেন্ট করতে Telegram-এ যোগাযোগ করুন এবং নিচের রেফারেন্স কোডটি পাঠান।</p>
+        <p class="muted">অনুগ্রহ করে পেমেন্ট করতে  Telegram-এ যোগাযোগ করুন। নিচে রেফারেন্স কোডটি পাঠাবেন।</p>
         <p><strong id="refCode" style="font-size:18px"></strong></p>
 
         <label>Copy করা Message Telegram-এ পাঠান:</label>
@@ -78,13 +72,13 @@
         <button id="copyMsgBtn" class="btn">Copy Message</button>
         &nbsp;
         <a id="tgLink" class="btn" target="_blank" href="#">Open Telegram</a>
-        <p class="muted" style="margin-top:10px">আপনার পেমেন্ট নিশ্চিত হলে Admin PDF জেনারেট করে পাঠাবেন (১৫-২০ মিনিট সময় লাগতে পারে)।</p>
+        <p class="muted" style="margin-top:10px"> আপনার পেমেন্ট নিশ্চিত হলে Admin PDF জেনারেট করে আপনাকে  পাঠাবেন সেক্ষেত্রে ১৫/২০  মিনিট সময় লাগতে পারে ।</p>
       </div>
     </main>
   </div>
 
   <script>
-    const yourTg = '@remarkgenerator';
+    const yourTg = '@jhsimul';
 
     function generateRef(){ 
       const t = Date.now().toString().slice(-6); 
@@ -129,7 +123,7 @@
         for(const [k,v] of fd.entries()) data[k]=v.trim();
 
         data.heirs = [];
-        document.querySelectorAll('#heirsTable tbody tr').forEach((tr)=>{
+        document.querySelectorAll('#heirsTable tbody tr').forEach((tr, idx)=>{
           const name = tr.querySelector('.h-name').value.trim();
           const age = tr.querySelector('.h-age').value.trim();
           const rel = tr.querySelector('.h-rel').value.trim();
@@ -146,20 +140,21 @@
 
         let msg = `ওয়ারিশন সনদ অনুরোধ\nরেফারেন্স: ${ref}\n\nমৃত ব্যক্তির নাম: ${data.deceasedName||''}\nপিতা/স্বামী: ${data.fatherName||''}\nমহল্লা: ${data.mohalla||''}\nওয়ার্ড: ${data.postOffice||''}\nডাকঘর: ${data.upazila||''}\nউপজেলা/থানা: ${data.thana||''}\nজেলা: ${data.ward||''}\n\nওয়ারিশদের তালিকা:\n`;
         data.heirs.forEach((h,i)=> { msg += `${i+1}. ${h.name} | বয়স: ${h.age} | সম্পর্ক: ${h.rel} ${h.note?('| '+h.note):''}\n`; });
-        msg += `\nআমি ৪০০ টাকা পেমেন্ট করতে চাচ্ছি। অনুগ্রহ করে পেমেন্ট মেথড শেয়ার করুন।\nরেফারেন্স কোড: ${ref}`;
+        msg += `\nআমি ৪০০ টাকা পেমেন্ট করতে চাচ্ছি। অনুগ্রহ করে পেমেন্ট মাথোড শেয়ার করুন ।\nরেফারেন্স কোড: ${ref}`;
 
         document.getElementById('msgToSend').value = msg;
 
-        const shareWithText = 'https://t.me/remarkgenerator?text=' + encodeURIComponent(msg);
+        // Direct Telegram message link to @jhsimul
+        const shareWithText = 'https://t.me/jhsimul?text=' + encodeURIComponent(msg);
         document.getElementById('tgLink').href = shareWithText;
       });
 
       document.getElementById('copyMsgBtn').addEventListener('click', ()=>{
         const t = document.getElementById('msgToSend');
         t.select();
-        navigator.clipboard.writeText(t.value).then(()=> alert('Message copied. এখন Telegram-এ paste করুন।'));
+        navigator.clipboard.writeText(t.value).then(()=> alert('Message copied to clipboard. এখন Telegram-এ paste করুন।'));
       });
     });
   </script>
 </body>
-  </html>
+</html>
