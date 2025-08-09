@@ -8,8 +8,8 @@
   <!-- Bengali Font: Noto Sans Bengali from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap" rel="stylesheet" />
 
-  <!-- jsPDF CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     body {
@@ -161,6 +161,28 @@
         width: 100%;
       }
     }
+    /* PDF Layout Styles */
+    #pdfContent {
+      font-family: "Noto Sans Bengali", Arial, sans-serif;
+      padding: 20px;
+      color: #222;
+    }
+    #pdfContent h1, #pdfContent h3 {
+      color: #0b5ed7;
+    }
+    #pdfContent table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    #pdfContent table, #pdfContent th, #pdfContent td {
+      border: 1px solid #333;
+    }
+    #pdfContent th, #pdfContent td {
+      padding: 6px 8px;
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -216,239 +238,150 @@
         <table id="heirsTable" aria-label="ওয়ারিশদের তথ্যের তালিকা">
           <thead>
             <tr>
-              <th style="width:5%;">ক্রমিক নং</th>
-              <th style="width:35%;">নাম</th>
-              <th style="width:15%;">বয়স</th>
-              <th style="width:20%;">সম্পর্ক</th>
-              <th style="width:20%;">মন্তব্য</th>
-              <th style="width:5%;"></th>
+              <th style="width: 35%;">ওয়ারিশের নাম</th>
+              <th style="width: 20%;">সম্পর্ক</th>
+              <th style="width: 20%;">মোবাইল নম্বর</th>
+              <th style="width: 20%;">ঠিকানা</th>
+              <th style="width: 5%;">#</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- ওয়ারিশের সারি এখানে ডায়নামিকলি যোগ হবে -->
+          <tbody id="heirsBody">
+            <tr>
+              <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+              <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
+              <td><input type="text" name="mobile[]" placeholder="মোবাইল নম্বর"></td>
+              <td><input type="text" name="address[]" placeholder="ঠিকানা"></td>
+              <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
+            </tr>
           </tbody>
         </table>
-        <div style="margin-bottom: 15px;">
-          <button type="button" id="addHeirBtn" class="btn">+ ওয়ারিশ যোগ করুন</button>
-        </div>
+        <button type="button" id="addHeir" class="btn" aria-label="নতুন ওয়ারিশ যুক্ত করুন">+ নতুন ওয়ারিশ যুক্ত করুন</button>
 
-        <div class="row">
-          <label for="phone">আপনার ফোন (PDF এ রাখা যাবে)</label>
-          <input id="phone" name="phone" type="text" placeholder="০১XXXXXXXXX" >
+        <div class="row" style="margin-top: 20px;">
+          <button type="submit" class="btn" aria-label="পিডিএফ তৈরি করুন">পিডিএফ তৈরি করুন</button>
         </div>
-        <div class="row">
-          <label for="email">আপনার ইমেইল (ঐচ্ছিক)</label>
-          <input id="email" name="email" type="text" placeholder="example@mail.com" >
-        </div>
-
-        <div class="row" style="margin-top: 18px;">
-          <button type="submit" id="submitBtn">Submit and Generate PDF</button>
-        </div>
-
-        <p id="note">নোট: এখানে Submit দিলে পিডিএফ ব্রাউজার থেকেই ডাউনলোড হবে। (তবে অরিজিনাল ফাইল পেতে পেমেন্ট ভেরিফাই করে টেলিগ্রাম এ যোগাযোগ করুন)</p>
       </form>
     </main>
   </div>
 
   <script>
-  // ---------------- Utilities ----------------
-  function generateRef() {
-    const t = Date.now().toString().slice(-6);
-    const r = Math.floor(Math.random() * 9000) + 1000;
-    return 'WF-' + t + '-' + r;
-  }
-
-  function addHeirRow(name = '', age = '', rel = '', note = '') {
-    const tbody = document.querySelector('#heirsTable tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="serial"></td>
-      <td><input class="h-name" type="text" value="${(name || '').replace(/"/g, '&quot;')}" placeholder="নাম" required></td>
-      <td><input class="h-age" type="text" value="${(age || '').replace(/"/g, '&quot;')}" placeholder="বয়স" ></td>
-      <td><input class="h-rel" type="text" value="${(rel || '').replace(/"/g, '&quot;')}" placeholder="সম্পর্ক" ></td>
-      <td><input class="h-note" type="text" value="${(note || '').replace(/"/g, '&quot;')}" placeholder="মন্তব্য" ></td>
-      <td><button type="button" class="removeRow" aria-label="ওয়ারিশ মুছে ফেলুন">Remove</button></td>`;
-    tbody.appendChild(tr);
-    tr.querySelector('.removeRow').addEventListener('click', () => {
-      tr.remove();
-      updateSerials();
+    // নতুন ওয়ারিশ সারি যোগ করা
+    document.getElementById('addHeir').addEventListener('click', () => {
+      const tbody = document.getElementById('heirsBody');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" name="heirName[]" required placeholder="নাম লিখুন"></td>
+        <td><input type="text" name="relation[]" required placeholder="সম্পর্ক"></td>
+        <td><input type="text" name="mobile[]" placeholder="মোবাইল নম্বর"></td>
+        <td><input type="text" name="address[]" placeholder="ঠিকানা"></td>
+        <td><button type="button" class="removeRow" aria-label="সারি মুছুন">&times;</button></td>
+      `;
+      tbody.appendChild(tr);
     });
-    updateSerials();
-  }
 
-  function updateSerials() {
-    document.querySelectorAll('#heirsTable tbody tr').forEach((tr, i) => {
-      const cell = tr.querySelector('.serial');
-      if (cell) cell.textContent = String(i + 1).padStart(2, '0');
-    });
-  }
-
-  // ---------------- PDF Generation ----------------
-  async function generatePDF(data) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'pt', 'a4');
-    const margin = 40;
-    let y = 40;
-
-    // Load logo.png if present
-    async function addLogo() {
-      return new Promise((res) => {
-        const img = new Image();
-        img.src = './logo.png';
-        img.onload = function () {
-          try {
-            doc.addImage(img, 'PNG', margin, y, 80, 50);
-            y += 60;
-          } catch (e) { }
-          res();
-        };
-        img.onerror = function () { res(); };
-      });
-    }
-    await addLogo();
-
-    doc.setFontSize(16);
-    doc.setFont('NotoSansBengali', 'normal'); // set font if embedded (see note below)
-    doc.text(data.formName || 'ওয়ারিশন সনদ', doc.internal.pageSize.getWidth() / 2, y, { align: 'center' });
-    y += 26;
-
-    doc.setFontSize(10);
-    doc.text(`রেফারেন্স: ${data.ref}`, margin, y); y += 16;
-    doc.text(`তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, margin, y); y += 20;
-
-    // Deceased info
-    doc.setFontSize(12);
-    doc.text('মৃত ব্যক্তির তথ্য:', margin, y); y += 18;
-    const leftColX = margin;
-    const rightColX = 320;
-    doc.setFontSize(10);
-    doc.text(`নাম: ${data.deceasedName || ''}`, leftColX, y);
-    doc.text(`পিতা/স্বামী: ${data.fatherName || ''}`, rightColX, y); y += 16;
-    doc.text(`মহল্লা: ${data.mohalla || ''}`, leftColX, y);
-    doc.text(`ওয়ার্ড: ${data.ward || ''}`, rightColX, y); y += 16;
-    doc.text(`ডাকঘর: ${data.postOffice || ''}`, leftColX, y);
-    doc.text(`উপজেলা/থানা: ${data.thana || ''}`, rightColX, y); y += 16;
-    doc.text(`জেলা: ${data.district || ''}`, leftColX, y); y += 24;
-
-    // Heirs header
-    doc.setFontSize(12);
-    doc.text('ওয়ারিশদের তালিকা:', margin, y); y += 18;
-    doc.setFontSize(10);
-
-    // Table-like layout
-    const lineHeight = 16;
-    const col1 = margin;       // serial
-    const col2 = margin + 30;  // name
-    const col3 = margin + 260; // age
-    const col4 = margin + 310; // rel
-    const col5 = margin + 400; // note
-
-    if ((data.heirs || []).length === 0) {
-      doc.text('কোনও ওয়ারিশ তথ্য দেওয়া হয়নি।', margin, y);
-      y += lineHeight;
-    } else {
-      for (let idx = 0; idx < data.heirs.length; idx++) {
-        const h = data.heirs[idx];
-        if (y > 740) { // page break if near bottom
-          doc.addPage();
-          y = 40;
-        }
-        doc.text(String(idx + 1).padStart(2, '0'), col1, y);
-
-        // Wrap name & note text
-        const nameLines = doc.splitTextToSize(h.name || '', 220);
-        doc.text(nameLines, col2, y);
-
-        doc.text(h.age || '', col3, y);
-        doc.text(h.rel || '', col4, y);
-
-        if (h.note) {
-          const noteLines = doc.splitTextToSize(h.note, 150);
-          doc.text(noteLines, col5, y);
-          y += lineHeight * Math.max(nameLines.length, noteLines.length);
+    // সারি মুছার ইভেন্ট ডেলিগেশন
+    document.getElementById('heirsBody').addEventListener('click', (e) => {
+      if (e.target.classList.contains('removeRow')) {
+        const tbody = document.getElementById('heirsBody');
+        if(tbody.rows.length > 1) {
+          e.target.closest('tr').remove();
         } else {
-          y += lineHeight * nameLines.length;
+          alert('কমপক্ষে একটি ওয়ারিশের তথ্য থাকতে হবে।');
         }
       }
-    }
-
-    y += 24;
-    doc.setFontSize(12);
-    doc.text('যোগাযোগের তথ্য:', margin, y);
-    y += 18;
-    doc.setFontSize(10);
-    doc.text(`ফোন: ${data.phone || ''}`, margin, y);
-    y += 16;
-    if (data.email) {
-      doc.text(`ইমেইল: ${data.email}`, margin, y);
-      y += 16;
-    }
-
-    y += 30;
-    doc.setFontSize(9);
-    doc.setTextColor("#888");
-    doc.text("এই সনদ শুধুমাত্র তথ্যের স্বার্থে তৈরি। কোনো আইনি দৃষ্টিকোণ থেকে ব্যবহার করার পূর্বে প্রযোজ্য আইন পর্যালোচনা করুন।", margin, y);
-
-    doc.save(`warishon_sondho_${data.deceasedName ? data.deceasedName.replace(/\s+/g, '_') : 'document'}.pdf`);
-  }
-
-  // --------------- Main ---------------
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('warishForm');
-    const addHeirBtn = document.getElementById('addHeirBtn');
-
-    // Add initial heir row
-    addHeirRow();
-
-    addHeirBtn.addEventListener('click', () => {
-      addHeirRow();
     });
 
-    form.addEventListener('submit', async (e) => {
+    // ফর্ম সাবমিট হলে PDF বানানো
+    document.getElementById('warishForm').addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // Collect data
-      const data = {
-        ref: generateRef(),
-        formName: form.formName.value.trim(),
-        formNumber: form.formNumber.value.trim(),
-        deceasedName: form.deceasedName.value.trim(),
-        fatherName: form.fatherName.value.trim(),
-        mohalla: form.mohalla.value.trim(),
-        ward: form.ward.value.trim(),
-        postOffice: form.postOffice.value.trim(),
-        thana: form.thana.value.trim(),
-        district: form.district.value.trim(),
-        phone: form.phone.value.trim(),
-        email: form.email.value.trim(),
-        heirs: []
-      };
+      // তথ্য নিয়ে PDF তৈরির জন্য একটি নতুন div তৈরি
+      const pdfContent = document.createElement('div');
+      pdfContent.id = 'pdfContent';
 
-      const rows = document.querySelectorAll('#heirsTable tbody tr');
-      rows.forEach(row => {
-        const name = row.querySelector('.h-name').value.trim();
-        if (!name) return; // skip empty
-        const age = row.querySelector('.h-age').value.trim();
-        const rel = row.querySelector('.h-rel').value.trim();
-        const note = row.querySelector('.h-note').value.trim();
-        data.heirs.push({ name, age, rel, note });
+      // ফর্মের ইনপুটগুলি থেকে মানগুলো নিয়ে আসা
+      const formName = document.getElementById('formName').value;
+      const formNumber = document.getElementById('formNumber').value;
+      const deceasedName = document.getElementById('deceasedName').value;
+      const fatherName = document.getElementById('fatherName').value;
+      const mohalla = document.getElementById('mohalla').value;
+      const ward = document.getElementById('ward').value;
+      const postOffice = document.getElementById('postOffice').value;
+      const thana = document.getElementById('thana').value;
+      const district = document.getElementById('district').value;
+
+      // ওয়ারিশদের তথ্য সংগ্রহ করা
+      const heirs = [];
+      const heirNames = document.getElementsByName('heirName[]');
+      const relations = document.getElementsByName('relation[]');
+      const mobiles = document.getElementsByName('mobile[]');
+      const addresses = document.getElementsByName('address[]');
+
+      for(let i=0; i<heirNames.length; i++) {
+        heirs.push({
+          name: heirNames[i].value.trim(),
+          relation: relations[i].value.trim(),
+          mobile: mobiles[i].value.trim(),
+          address: addresses[i].value.trim(),
+        });
+      }
+
+      // PDF এর HTML content সাজানো
+      let html = `
+        <h1>${formName}</h1>
+        ${formNumber ? `<p><strong>ফর্ম নম্বর:</strong> ${formNumber}</p>` : ''}
+        <h3>মৃত ব্যক্তির তথ্য</h3>
+        <p><strong>নাম:</strong> ${deceasedName}</p>
+        <p><strong>পিতা/স্বামী:</strong> ${fatherName}</p>
+        <p><strong>মহল্লা:</strong> ${mohalla}</p>
+        <p><strong>ওয়ার্ড নং:</strong> ${ward}</p>
+        <p><strong>ডাকঘর:</strong> ${postOffice}</p>
+        <p><strong>উপজেলা/থানা:</strong> ${thana}</p>
+        <p><strong>জেলা:</strong> ${district}</p>
+
+        <h3>ওয়ারিশদের তালিকা</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>নাম</th>
+              <th>সম্পর্ক</th>
+              <th>মোবাইল নম্বর</th>
+              <th>ঠিকানা</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      heirs.forEach(h => {
+        html += `
+          <tr>
+            <td>${h.name}</td>
+            <td>${h.relation}</td>
+            <td>${h.mobile || '-'}</td>
+            <td>${h.address || '-'}</td>
+          </tr>
+        `;
       });
 
-      // Validate required fields
-      if (!data.formName) return alert('ফর্ম নাম দিন');
-      if (!data.deceasedName) return alert('মৃত ব্যক্তির নাম দিন');
-      if (!data.fatherName) return alert('পিতা/স্বামী এর নাম দিন');
-      if (!data.mohalla) return alert('মহল্লার নাম দিন');
-      if (!data.ward) return alert('ওয়ার্ড নম্বর দিন');
-      if (!data.postOffice) return alert('ডাকঘরের নাম দিন');
-      if (!data.thana) return alert('উপজেলা/থানা দিন');
-      if (!data.district) return alert('জেলার নাম দিন');
-      if (data.heirs.length === 0) return alert('কমপক্ষে একটি ওয়ারিশের তথ্য দিন');
+      html += `
+          </tbody>
+        </table>
+        <p style="margin-top: 30px;">এই সনদটি ওয়ারিশদের তালিকা হিসেবে প্রস্তুত করা হয়েছে।</p>
+      `;
 
-      // Generate PDF
-      await generatePDF(data);
+      pdfContent.innerHTML = html;
+
+      // pdfContent div কে বডিতে যোগ না করে সরাসরি html2pdf কল করা
+      const opt = {
+        margin:       0.4,
+        filename:     `Warishon_Sondho_${deceasedName.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(pdfContent).save();
     });
-  });
   </script>
 </body>
-</html>
+            </html>
