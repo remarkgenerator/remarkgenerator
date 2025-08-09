@@ -1,160 +1,145 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ওয়ারিশন সনদ ফর্ম</title>
-  <style>
-    body{font-family: "Noto Sans Bengali", Arial, sans-serif;background:#f3f4f6;margin:0;padding:20px}
-    .container{max-width:900px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
-    header{text-align:center;margin-bottom:10px}
-    header img{max-height:70px}
-    h1{margin:6px 0;font-size:22px}
-    .small{color:#666;font-size:13px}
-    .row{margin-bottom:10px}
-    label{display:block;font-weight:700;margin-bottom:6px}
-    input[type=text], textarea, select {width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;font-size:15px}
-    button, .btn{background:#0b5ed7;color:#fff;padding:8px 12px;border:none;border-radius:6px;cursor:pointer}
-    #heirsTable{width:100%;border-collapse:collapse;margin:10px 0}
-    #heirsTable th,#heirsTable td{border:1px solid #e0e0e0;padding:6px;text-align:left}
-    .row-inline{display:flex;gap:8px}
-    .row-inline input{flex:1}
-    #pendingArea{background:#fff8e6;border:1px solid #ffdfb3;padding:12px;border-radius:6px;margin-top:12px}
-    .muted{color:#666;font-size:13px}
-    .removeRow{background:#e74c3c;padding:4px 8px;border-radius:4px;border:none;color:#fff;cursor:pointer}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ওয়ারিশ সনদ ফর্ম</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f7f9fc;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+    label {
+        font-weight: bold;
+        margin-top: 15px;
+        display: block;
+        color: #444;
+    }
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+    button {
+        background: #4CAF50;
+        color: white;
+        padding: 12px;
+        margin-top: 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+    }
+    button:hover {
+        background: #45a049;
+    }
+    .success {
+        text-align: center;
+        color: green;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img id="logo" src="logo.png" alt="Logo" onerror="this.style.display='none'">
-      <h1>ওয়ারিশন সনদ ফর্ম</h1>
-      <p class="small"> ১. তথ্য দিন
-        ২. Submit 
-        ৩. Telegram-এ যোগাযোগ করুন </p>
-    </header>
 
-    <main id="main-area">
-      <form id="warishForm">
-        <div class="row"><label>ফর্ম নাম</label><input name="formName" type="text" value="ওয়ারিশন সনদ" required></div>
-        <div class="row"><label>ফর্ম নম্বর (ঐচ্ছিক)</label><input name="formNumber" type="text"></div>
+<div class="container">
+    <h2>ওয়ারিশ সনদ আবেদন ফর্ম</h2>
+    <form id="warishForm">
+        <label>মৃত ব্যক্তির নাম</label>
+        <input type="text" name="mritoname" required>
 
-        <h3>মৃত ব্যক্তির তথ্য</h3>
-        <div class="row"><label>মৃত ব্যক্তির নাম</label><input name="deceasedName" type="text" required></div>
-        <div class="row"><label>পিতা/স্বামী </label><input name="fatherName" type="text" required></div>
-        <div class="row"><label>মহল্লা</label><input name="mohalla" type="text" required></div>
-        <div class="row"><label>ওয়ার্ড নং</label><input name="postOffice" type="text" required></div>
-        <div class="row"><label>ডাকঘর</label><input name="upazila" type="text" required></div>
-        <div class="row"><label>উপজেলা/থানা:</label><input name="thana" type="text" required></div>
-        <div class="row"><label>জেলা</label><input name="ward" type="text" required></div>
+        <label>মৃত্যুর তারিখ</label>
+        <input type="date" name="mritu_date" required>
 
-        <h3>ওয়ারিশদের তালিকা</h3>
-        <table id="heirsTable">
-          <thead>
-            <tr><th>ক্রমিক নং</th><th>নাম</th><th>বয়স</th><th>সম্পর্ক</th><th>মন্তব্য</th><th></th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <button type="button" id="addHeirBtn" class="btn">+ ওয়ারিশ যোগ করুন</button>
+        <label>ওয়ারিশ তালিকা</label>
+        <textarea name="warish_list" rows="4" placeholder="ওয়ারিশদের নাম ও সম্পর্ক লিখুন" required></textarea>
 
-        <div class="row" style="margin-top:12px">
-          <button type="submit" id="submitBtn">Submit</button>
-        </div>
-      </form>
+        <label>যোগাযোগের নাম</label>
+        <input type="text" name="contact_name" required>
 
-      <div id="pendingArea" style="display:none;">
-        <h3>Payment Pending</h3>
-        <p class="muted">অনুগ্রহ করে পেমেন্ট করতে  Telegram-এ যোগাযোগ করুন। নিচে রেফারেন্স কোডটি পাঠাবেন।</p>
-        <p><strong id="refCode" style="font-size:18px"></strong></p>
+        <label>যোগাযোগের নম্বর</label>
+        <input type="tel" name="contact_number" required>
 
-        <label>Copy করা Message Telegram-এ পাঠান:</label>
-        <textarea id="msgToSend" rows="7" style="width:100%"></textarea><br><br>
-        <button id="copyMsgBtn" class="btn">Copy Message</button>
-        &nbsp;
-        <a id="tgLink" class="btn" target="_blank" href="#">Open Telegram</a>
-        <p class="muted" style="margin-top:10px"> আপনার পেমেন্ট নিশ্চিত হলে Admin PDF জেনারেট করে আপনাকে  পাঠাবেন সেক্ষেত্রে ১৫/২০  মিনিট সময় লাগতে পারে ।</p>
-      </div>
-    </main>
-  </div>
+        <input type="hidden" name="serial_number" id="serial_number">
 
-  <script>
-    const yourTg = '@remarkgenerator';
+        <button type="submit">সাবমিট করুন</button>
+    </form>
+    <div id="msg" class="success"></div>
+</div>
 
-    function generateRef(){ 
-      const t = Date.now().toString().slice(-6); 
-      const r = Math.floor(Math.random()*9000)+1000; 
-      return 'WF-'+t+'-'+r; 
-    }
+<script>
+// Serial Number Generate
+document.getElementById("serial_number").value = "SN" + Date.now();
 
-    function updateSerials(){
-      const rows = document.querySelectorAll('#heirsTable tbody tr');
-      rows.forEach((tr,i)=>{
-        const s = String(i+1).padStart(2,'0');
-        const cell = tr.querySelector('.serial');
-        if(cell) cell.textContent = s;
-      });
-    }
+// Form Submission
+document.getElementById("warishForm").addEventListener("submit", function(e){
+    e.preventDefault();
 
-    function addHeirRow(name='', age='', rel='', note=''){
-      const tbody = document.querySelector('#heirsTable tbody');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="serial"></td>
-        <td><input class="h-name" type="text" value="${(name||'').replace(/"/g,'&quot;')}"></td>
-        <td><input class="h-age" type="text" value="${(age||'').replace(/"/g,'&quot;')}"></td>
-        <td><input class="h-rel" type="text" value="${(rel||'').replace(/"/g,'&quot;')}"></td>
-        <td><input class="h-note" type="text" value="${(note||'').replace(/"/g,'&quot;')}"></td>
-        <td><button class="removeRow">Remove</button></td>`;
-      tbody.appendChild(tr);
-      tr.querySelector('.removeRow').addEventListener('click', ()=> { tr.remove(); updateSerials(); });
-      updateSerials();
-    }
+    const form = e.target;
+    const data = new FormData(form);
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const form = document.getElementById('warishForm'), addBtn = document.getElementById('addHeirBtn');
+    // Apps Script URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbycA3xZmPrAJ6FTWYwLtPWZFADjho099AvIZ3KLnumygXpRh6ZhxmjgN2dpHLcBxits/exec";
 
-      addHeirRow();
-
-      addBtn.addEventListener('click', ()=> addHeirRow());
-
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        const fd = new FormData(form); const data = {};
-        for(const [k,v] of fd.entries()) data[k]=v.trim();
-
-        data.heirs = [];
-        document.querySelectorAll('#heirsTable tbody tr').forEach((tr, idx)=>{
-          const name = tr.querySelector('.h-name').value.trim();
-          const age = tr.querySelector('.h-age').value.trim();
-          const rel = tr.querySelector('.h-rel').value.trim();
-          const note = tr.querySelector('.h-note').value.trim();
-          if(name) data.heirs.push({name, age, rel, note});
-        });
-
-        const ref = generateRef(); data.ref = ref;
-        try{ sessionStorage.setItem('warish_'+ref, JSON.stringify(data)); }catch(e){}
-
-        form.style.display='none';
-        document.getElementById('pendingArea').style.display='block';
-        document.getElementById('refCode').textContent = ref;
-
-        let msg = `ওয়ারিশন সনদ অনুরোধ\nরেফারেন্স: ${ref}\n\nমৃত ব্যক্তির নাম: ${data.deceasedName||''}\nপিতা/স্বামী: ${data.fatherName||''}\nমহল্লা: ${data.mohalla||''}\nওয়ার্ড: ${data.postOffice||''}\nডাকঘর: ${data.upazila||''}\nউপজেলা/থানা: ${data.thana||''}\nজেলা: ${data.ward||''}\n\nওয়ারিশদের তালিকা:\n`;
-        data.heirs.forEach((h,i)=> { msg += `${i+1}. ${h.name} | বয়স: ${h.age} | সম্পর্ক: ${h.rel} ${h.note?('| '+h.note):''}\n`; });
-        msg += `\nআমি ৪০০ টাকা পেমেন্ট করতে চাচ্ছি। অনুগ্রহ করে পেমেন্ট মাথোড শেয়ার করুন ।\nরেফারেন্স কোড: ${ref}`;
-
-        document.getElementById('msgToSend').value = msg;
-
-        // Direct Telegram message link to @remarkgenerator
-        const shareWithText = 'https://t.me/remarkgenerator?text=' + encodeURIComponent(msg);
-        document.getElementById('tgLink').href = shareWithText;
-      });
-
-      document.getElementById('copyMsgBtn').addEventListener('click', ()=>{
-        const t = document.getElementById('msgToSend');
-        t.select();
-        navigator.clipboard.writeText(t.value).then(()=> alert('Message copied to clipboard. এখন Telegram-এ paste করুন।'));
-      });
+    fetch(scriptURL, { method: "POST", body: data })
+    .then(res => {
+        if(res.ok){
+            sendToTelegram(data);
+        } else {
+            document.getElementById("msg").innerText = "সাবমিট ব্যর্থ হয়েছে!";
+        }
+    })
+    .catch(err => {
+        document.getElementById("msg").innerText = "সার্ভারে সমস্যা হয়েছে!";
+        console.error(err);
     });
-  </script>
+});
+
+// Telegram Message Send
+function sendToTelegram(data){
+    const botToken = "YOUR_TELEGRAM_BOT_TOKEN"; // এখানে তোমার Bot Token বসাবে
+    const chatId = "@remarkgenerator"; // তোমার ইউজার আইডি
+
+    let message = "📜 নতুন ওয়ারিশ সনদ আবেদন:\n";
+    message += "🔹 মৃত ব্যক্তির নাম: " + data.get("mritoname") + "\n";
+    message += "📅 মৃত্যুর তারিখ: " + data.get("mritu_date") + "\n";
+    message += "👥 ওয়ারিশ তালিকা: " + data.get("warish_list") + "\n";
+    message += "📞 যোগাযোগ: " + data.get("contact_name") + " (" + data.get("contact_number") + ")\n";
+    message += "🆔 সিরিয়াল নম্বর: " + data.get("serial_number");
+
+    fetch(https://api.telegram.org/bot${botToken}/sendMessage, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: message })
+    })
+    .then(response => {
+        if(response.ok){
+            window.location.href = "https://remarkgenerator.github.io/remarkgenerator/";
+        } else {
+            document.getElementById("msg").innerText = "Telegram এ মেসেজ পাঠানো ব্যর্থ হয়েছে!";
+        }
+    });
+}
+</script>
+
 </body>
-              </html>
+</html>
