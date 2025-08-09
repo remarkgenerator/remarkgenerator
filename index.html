@@ -138,9 +138,9 @@
         document.getElementById('pendingArea').style.display='block';
         document.getElementById('refCode').textContent = ref;
 
-        let msg = ওয়ারিশন সনদ অনুরোধ\nরেফারেন্স: ${ref}\n\nমৃত ব্যক্তির নাম: ${data.deceasedName||''}\nপিতা/স্বামী: ${data.fatherName||''}\nমহল্লা: ${data.mohalla||''}\nওয়ার্ড: ${data.postOffice||''}\nডাকঘর: ${data.upazila||''}\nউপজেলা/থানা: ${data.thana||''}\nজেলা: ${data.ward||''}\n\nওয়ারিশদের তালিকা:\n;
-        data.heirs.forEach((h,i)=> { msg += ${i+1}. ${h.name} | বয়স: ${h.age} | সম্পর্ক: ${h.rel} ${h.note?('| '+h.note):''}\n; });
-        msg += \nআমি ৪০০ টাকা পেমেন্ট করতে চাচ্ছি। অনুগ্রহ করে পেমেন্ট মাথোড শেয়ার করুন ।\nরেফারেন্স কোড: ${ref};
+        let msg = `ওয়ারিশন সনদ অনুরোধ\nরেফারেন্স: ${ref}\n\nমৃত ব্যক্তির নাম: ${data.deceasedName||''}\nপিতা/স্বামী: ${data.fatherName||''}\nমহল্লা: ${data.mohalla||''}\nওয়ার্ড: ${data.postOffice||''}\nডাকঘর: ${data.upazila||''}\nউপজেলা/থানা: ${data.thana||''}\nজেলা: ${data.ward||''}\n\nওয়ারিশদের তালিকা:\n`;
+        data.heirs.forEach((h,i)=> { msg += `${i+1}. ${h.name} | বয়স: ${h.age} | সম্পর্ক: ${h.rel} ${h.note?('| '+h.note):''}\n`; });
+        msg += `\nআমি ৪০০ টাকা পেমেন্ট করতে চাচ্ছি। অনুগ্রহ করে পেমেন্ট মাথোড শেয়ার করুন ।\nরেফারেন্স কোড: ${ref}`;
 
         document.getElementById('msgToSend').value = msg;
 
@@ -157,4 +157,4 @@
     });
   </script>
 </body>
-              </html>
+  </html>
