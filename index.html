@@ -404,8 +404,7 @@
         if (e.target.classList.contains('removeRow')) {
           const tbody = document.getElementById('heirsBody');
           // Minimum 1 heir row must remain
-          if (tbody.rows.length > 1) {
-            e.target.closest('tr').remove();
+          if (tbody.rows.length > 1) {e.target.closest('tr').remove();
             updateSerials();
           } else {
             alert('কমপক্ষে একটি ওয়ারিশ থাকা বাধ্যতামূলক।');
@@ -732,7 +731,7 @@
     contactConfirmBtn.addEventListener('click', () => {
       if(contactRefCodeInput.value.trim().toUpperCase() === currentReferenceCode){
         // open telegram chat with username
-        const tgUrl = `https://t.me/${TELEGRAM_USERNAME}`;
+        const tgUrl = `https://t.me/${TELEGRAM_USERNAME}?text=রেফারেন্স%20কোড%20হলো%20${currentReferenceCode}%20এবং%20আরো%20তথ্য%20আপনার%20ফর্মে%20যথাযথ%20দেওয়া%20হয়েছে।`;
         window.open(tgUrl, '_blank');
         telegramContactPopup.style.display = 'none';
       } else {
